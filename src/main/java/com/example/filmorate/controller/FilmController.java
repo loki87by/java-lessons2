@@ -28,7 +28,7 @@ public class FilmController {
             int id = film.getId();
 
             if (films.containsKey(id)) {
-                throw new IdAlreadyExistException("Пользователь с таким id уже существует");
+                throw new IdAlreadyExistException("Фильм с таким id уже существует");
             } else {
                 films.put(id, film);
                 log.debug("Данные фильма: {} сохранены", film);
