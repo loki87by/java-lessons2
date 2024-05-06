@@ -2,16 +2,21 @@ package com.example.filmorate.controller;
 
 import com.example.filmorate.model.User;
 
+import jakarta.validation.Valid;
+
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @Slf4j
@@ -26,7 +31,8 @@ public class UserController {
     }
 
     @PostMapping(value = "/users")
-    public ResponseEntity<?> create(@RequestBody User user) {
+    public ResponseEntity<?> create(@Valid @RequestBody User user) {
+        
         List<String> errorMessages = new ArrayList<>();
 
         int id;
@@ -65,7 +71,7 @@ public class UserController {
     }
 
     @PutMapping(value = "/users")
-    public ResponseEntity<?> update(@RequestBody User user) {
+    public ResponseEntity<?> update(@Valid @RequestBody User user) {
         try {
             int id = user.getId();
 
@@ -97,5 +103,17 @@ public class UserController {
             user.setId(id);
             return create(user);
         }
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<?> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        List<String> errors = ex.getBindingResult()
+                .getAllErrors()
+                .stream()
+                .map(error -> ((FieldError) error).getField() + ": " + error.getDefaultMessage())
+                .collect(Collectors.toList());
+        log.error(String.valueOf(errors));
+        return ResponseEntity.badRequest().body(errors);
     }
 }

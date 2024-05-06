@@ -1,5 +1,6 @@
 package com.example.filmorate.model;
 
+import jakarta.validation.constraints.Email;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -9,6 +10,7 @@ import java.time.Instant;
 @NoArgsConstructor
 public class User {
     private int id;
+    @Email(message = "Неправильный формат email")
     private String email;
     private String login;
     private String name;
