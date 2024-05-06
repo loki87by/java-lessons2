@@ -6,7 +6,7 @@ import java.time.Instant;
 
 @Data
 public class Film {
-    private final int id;
+    private int id;
     private String name;
     private String description;
     private Instant releaseDate;
