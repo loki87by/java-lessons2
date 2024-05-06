@@ -1,12 +1,19 @@
 package com.example.filmorate.controller;
 
 import com.example.filmorate.model.User;
-import com.example.filmorate.exception.IdAlreadyExistException;
+
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
+@RestController
 @Slf4j
 public class UserController {
 
@@ -19,28 +26,46 @@ public class UserController {
     }
 
     @PostMapping(value = "/users")
-    public User create(@RequestBody User user) throws IdAlreadyExistException {
-        try {
-            int id = user.getId();
+    public ResponseEntity<?> create(@RequestBody User user) {
+        List<String> errorMessages = new ArrayList<>();
 
-            if (users.containsKey(id)) {
-                throw new IdAlreadyExistException("Пользователь с таким id уже существует");
-            } else {
-                users.put(id, user);
-                log.debug("Данные пользователя: {} сохранены", user);
-                return user;
-            }
-        } catch (NullPointerException e) {
-            int id = users.size()*13;
-            user.setId(id);
-            users.put(id, user);
-            log.debug("Данные пользователя: {} сохранены", user);
-            return user;
+        int id;
+        if (!users.isEmpty()) {
+            id = users.size() * 13;
+        } else {
+            id = 1;
         }
+        user.setId(id);
+
+        if (user.getEmail() == null || !user.getEmail().contains("@")) {
+            String errorMessage = "Email обязателен к заполнению.";
+            log.error(errorMessage);
+            errorMessages.add(errorMessage);
+        }
+
+        if (user.getLogin() == null || user.getLogin().contains(" ")) {
+            String errorMessage = "Логин обязателен и не может содержать пробелы.";
+            log.error(errorMessage);
+            errorMessages.add(errorMessage);
+        }
+
+        if (user.getBirthday() != null && user.getBirthday().isAfter(Instant.now())) {
+            String errorMessage = "Пришельцам из будущего доступ запрещен.";
+            log.warn(errorMessage);
+            errorMessages.add(errorMessage);
+        }
+
+        if (!errorMessages.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessages);
+        }
+
+        users.put(id, user);
+        log.debug("Данные пользователя: {} сохранены", user);
+        return ResponseEntity.ok(user);
     }
 
     @PutMapping(value = "/users")
-    public User update(@RequestBody User user) throws IdAlreadyExistException {
+    public ResponseEntity<?> update(@RequestBody User user) {
         try {
             int id = user.getId();
 
@@ -60,10 +85,16 @@ public class UserController {
                 if (user.getEmail() != null && !user.getEmail().isEmpty()) {
                     currentUser.setEmail(user.getEmail());
                 }
-                return user;
+                return ResponseEntity.ok(currentUser);
             }
         } catch (NullPointerException e) {
-            user.setId(users.size()*13);
+            int id;
+            if (!users.isEmpty()) {
+                id = users.size() * 13;
+            } else {
+                id = 1;
+            }
+            user.setId(id);
             return create(user);
         }
     }

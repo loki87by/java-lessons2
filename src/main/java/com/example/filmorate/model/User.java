@@ -1,10 +1,12 @@
 package com.example.filmorate.model;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.Instant;
 
 @Data
+@NoArgsConstructor
 public class User {
     private int id;
     private String email;
