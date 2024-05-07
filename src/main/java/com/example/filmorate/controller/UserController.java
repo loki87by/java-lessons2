@@ -26,6 +26,13 @@ public class UserController {
 
     private HashMap<Integer, User> users = new HashMap<>();
 
+    private boolean isValidEmail(String email) {
+        String emailRegex = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
+        Pattern pattern = Pattern.compile(emailRegex);
+        Matcher matcher = pattern.matcher(email);
+        return !matcher.matches();
+    }
+
     @GetMapping("/users")
     public HashMap<Integer, User> findAll() {
         log.debug("Текущее количество пользователей: {}", users.size());
@@ -130,12 +137,5 @@ public class UserController {
                 .collect(Collectors.toList());
         log.error(String.valueOf(errors));
         return ResponseEntity.badRequest().body(errors);
-    }
-
-    private boolean isValidEmail(String email) {
-        String emailRegex = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
-        Pattern pattern = Pattern.compile(emailRegex);
-        Matcher matcher = pattern.matcher(email);
-        return !matcher.matches();
     }
 }
