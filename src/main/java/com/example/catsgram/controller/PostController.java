@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.example.catsgram.model.Post;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,9 +24,23 @@ public class PostController {
     }
 
     @GetMapping("/posts")
-    public List<Post> findAll() {
-        log.debug("Текущее количество постов: {}", postService.findAll().size());
-        return postService.findAll();
+    public List<Post> findAll(@RequestParam(required = false, defaultValue = "1") int page,
+                              @RequestParam(required = false, defaultValue = "10") int size,
+                              @RequestParam(required = false, defaultValue = "desc") String sort) {
+        Instant now = Instant.now();
+        int fullSize = page * size;
+        int firstIndex = (page - 1) * size;
+        List<Post> response = postService.findAll(fullSize, sort, now);
+
+        if (response.size() < fullSize) {
+            fullSize = response.size();
+            firstIndex = fullSize - size;
+
+            if (firstIndex < 0) {
+                firstIndex = 0;
+            }
+        }
+        return response.subList(firstIndex, fullSize);
     }
 
     @GetMapping("/posts/{postId}")
