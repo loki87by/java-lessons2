@@ -16,6 +16,8 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @RestController
@@ -43,8 +45,8 @@ public class UserController {
         }
         user.setId(id);
 
-        if (user.getEmail() == null || !user.getEmail().contains("@")) {
-            String errorMessage = "Email обязателен к заполнению.";
+        if (user.getEmail() == null || isValidEmail(user.getEmail())) {
+            String errorMessage = "Email обязателен к заполнению и должен соответствовать стандартам.";
             log.error(errorMessage);
             errorMessages.add(errorMessage);
         }
@@ -111,9 +113,29 @@ public class UserController {
         List<String> errors = ex.getBindingResult()
                 .getAllErrors()
                 .stream()
-                .map(error -> ((FieldError) error).getField() + ": " + error.getDefaultMessage())
+                .map(error -> {
+
+                    if (error instanceof FieldError fieldError) {
+
+                        if (fieldError.getField().equals("email")) {
+                            String emailValue = (String) fieldError.getRejectedValue();
+                            if (isValidEmail(emailValue)) {
+                                return "email: Некорректный формат email.";
+                            }
+                        }
+                        return fieldError.getField() + ": " + fieldError.getDefaultMessage();
+                    }
+                    return error.getObjectName() + ": " + error.getDefaultMessage();
+                })
                 .collect(Collectors.toList());
         log.error(String.valueOf(errors));
         return ResponseEntity.badRequest().body(errors);
+    }
+
+    private boolean isValidEmail(String email) {
+        String emailRegex = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
+        Pattern pattern = Pattern.compile(emailRegex);
+        Matcher matcher = pattern.matcher(email);
+        return !matcher.matches();
     }
 }
