@@ -4,13 +4,13 @@ import com.example.catsgram.service.PostService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import com.example.catsgram.model.Post;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 public class PostController {
@@ -26,6 +26,20 @@ public class PostController {
     public List<Post> findAll() {
         log.debug("Текущее количество постов: {}", postService.findAll().size());
         return postService.findAll();
+    }
+
+    @GetMapping("/posts/{postId}")
+    public ResponseEntity<?> findById(@PathVariable int postId) {
+        Optional<Post> current = postService.findAll().stream()
+                .filter(x -> x.getId() == postId).findFirst();
+
+        if (current.isEmpty()) {
+            String errorMessage = "Запрашиваемый ресурс не найден.";
+            log.warn(errorMessage);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorMessage);
+        }
+        log.debug("Нужный пост: {}", current);
+        return ResponseEntity.ok(current);
     }
 
     @PostMapping(value = "/post")

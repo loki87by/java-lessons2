@@ -15,6 +15,8 @@ public class PostService {
     }
 
     public Post create(Post post) {
+        int id = (posts.size() + 1) * 13;
+        post.setId(id);
         posts.add(post);
         return post;
     }
