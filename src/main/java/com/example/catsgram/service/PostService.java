@@ -16,8 +16,8 @@ public class PostService {
         return posts;
     }
 
-    public List<Post> findAll(int size, String sort, Instant from) {
-        List<Post> filtered = new ArrayList<>(posts.stream().filter(x -> x.getCreationDate().isBefore(from)).toList());
+    public List<Post> findFrom(int size, String sort, Instant from, List<Post> postsList) {
+        List<Post> filtered = new ArrayList<>(postsList.stream().filter(x -> x.getCreationDate().isBefore(from)).toList());
 
         if (sort.equalsIgnoreCase("asc")) {
             filtered.sort(Comparator.comparing(Post::getCreationDate));
@@ -26,6 +26,10 @@ public class PostService {
         }
         int lastIndex = Math.min(size, filtered.size());
         return filtered.subList(0, lastIndex);
+    }
+
+    public List<Post> findAll(int size, String sort, Instant from) {
+        return findFrom(size, sort, from, posts);
     }
 
     public Post create(Post post) {
