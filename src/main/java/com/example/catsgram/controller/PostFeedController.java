@@ -1,18 +1,24 @@
 package com.example.catsgram.controller;
 
+import com.example.catsgram.exceptions.IncorrectParameterException;
+import com.example.catsgram.model.ErrorResponse;
 import com.example.catsgram.model.FeedFriendsBody;
 import com.example.catsgram.model.Post;
 import com.example.catsgram.service.PostService;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @RestController
@@ -24,8 +30,13 @@ public class PostFeedController {
         this.postService = postService;
     }
 
+    @PostMapping(value = "/feed")
+    public Map<String, Integer> feed() {
+        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED, "фиг тебе");
+    }
+
     @PostMapping(value = "/feed/friends")
-    public ResponseEntity<?> create(@RequestBody String string) throws Exception {
+    public List<Post> findFriends(@RequestBody String string) throws Exception, ErrorResponse {
         ObjectMapper objectMapper = new ObjectMapper();
         FeedFriendsBody ffb;
         try {
@@ -36,14 +47,31 @@ public class PostFeedController {
         }
         List<String> friends = ffb.getFriends();
         List<Post> posts = new ArrayList<>();
-        for (String friend: friends) {
+        for (String friend : friends) {
             List<Post> friendPosts = postService.findAll().stream()
                     .filter(x -> Objects.equals(x.getAuthor(), friend)).toList();
             posts.addAll(friendPosts);
         }
         int page = ffb.getPage();
+        IncorrectParameterException error = null;
+
+        if (page < 0) {
+            error = new IncorrectParameterException("Ошибка с полем page");
+        }
         int size = ffb.getSize();
+
+        if (size < 0) {
+            error = new IncorrectParameterException("Ошибка с полем page");
+        }
         String sort = ffb.getSort();
+
+        if (!sort.equalsIgnoreCase("desc") && !sort.equalsIgnoreCase("asc")) {
+            error = new IncorrectParameterException("Ошибка с полем page");
+        }
+
+        if (error != null) {
+            throw ErrorHandler.incorrectParameterException(error);
+        }
         Instant now = Instant.now();
         int fullSize = page * size;
         int firstIndex = (page - 1) * size;
@@ -60,6 +88,6 @@ public class PostFeedController {
         response = response.subList(firstIndex, fullSize);
         /*System.out.println("\u001B[38;5;33m" + "posts: " + posts + "\u001B[0m");
         System.out.println("\u001b[32m" + "response: " + response + "\u001B[0m");*/
-        return ResponseEntity.ok(response);
+        return response;
     }
 }
