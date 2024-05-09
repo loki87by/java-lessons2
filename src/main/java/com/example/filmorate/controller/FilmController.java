@@ -1,8 +1,8 @@
 package com.example.filmorate.controller;
 
 import com.example.filmorate.model.Film;
-
 import com.example.filmorate.storage.FilmStorage;
+
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +35,7 @@ public class FilmController {
 
         if (createFilmRes.getFirst() instanceof Film) {
             log.debug("Данные фильма: {} сохранены", createFilmRes.getFirst());
-            return ResponseEntity.ok(film);
+            return ResponseEntity.ok(createFilmRes.getFirst());
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(createFilmRes);
         }
@@ -47,7 +47,7 @@ public class FilmController {
 
         if (updateFilmRes.getFirst() instanceof Film) {
             log.debug("Данные фильма: {} сохранены", updateFilmRes.getFirst());
-            return ResponseEntity.ok(film);
+            return ResponseEntity.ok(updateFilmRes.getFirst());
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(updateFilmRes);
         }

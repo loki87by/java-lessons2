@@ -22,8 +22,8 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public List<Object> create(Film film) {
         List<Object> result = new ArrayList<>();
-
         int id;
+
         if (!films.isEmpty()) {
             id = films.size() * 13;
         } else {
@@ -87,11 +87,11 @@ public class InMemoryFilmStorage implements FilmStorage {
 
                 List<Object> result = new ArrayList<>();
                 result.add(currentFilm);
-                //return ResponseEntity.ok(currentFilm);
                 return result;
             }
         } catch (NullPointerException e) {
             int id;
+
             if (!films.isEmpty()) {
                 id = films.size() * 13;
             } else {
