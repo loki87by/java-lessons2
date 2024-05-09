@@ -1,7 +1,7 @@
 package com.example.filmorate.storage;
 
 import com.example.filmorate.model.User;
-import org.springframework.stereotype.Service;
+//import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@Service
+//@Component
 public class InMemoryUserStorage implements UserStorage {
     private final HashMap<Integer, User> users = new HashMap<>();
 

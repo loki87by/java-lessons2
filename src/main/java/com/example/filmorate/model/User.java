@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -15,6 +17,7 @@ public class User {
     private String login;
     private String name;
     private Instant birthday;
+    private Set<Integer> friends = new HashSet<>();
 
     public User(int id, String email, String login, String name, Instant birthday) {
         this.id = id;
