@@ -1,6 +1,7 @@
 package com.example.filmorate.controller;
 
 import com.example.filmorate.model.User;
+import com.example.filmorate.service.UserService;
 import com.example.filmorate.storage.UserStorage;
 
 import jakarta.validation.Valid;
@@ -15,17 +16,21 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
 @Slf4j
 public class UserController {
     private final UserStorage userStorage;
+    private final UserService userService;
 
     @Autowired
-    public UserController(UserStorage userStorage) {
+    public UserController(UserStorage userStorage, UserService userService) {
         this.userStorage = userStorage;
+        this.userService = userService;
     }
 
     @GetMapping("/users")
@@ -57,6 +62,61 @@ public class UserController {
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(updateUserList);
         }
+    }
+
+    @GetMapping("/users/{id}")
+    public User findById(@RequestBody @PathVariable Integer id) {
+        User current = userStorage.findAll().get(id);
+
+        if (current == null) {
+            String errorMessage = "Пользователь с id: " + id + " не найден.";
+            log.warn(errorMessage);
+            //throw ErrorHandler.notFoundException(new NotFoundException(errorMessage));
+        }
+        log.debug("Нужный пользователь: {}", current);
+        return current;
+    }
+
+    @GetMapping("/users/{id}/friends")
+    public Set<User> findFriendsById(@RequestBody @PathVariable Integer id) {
+        User current = userStorage.findAll().get(id);
+
+        if (current == null) {
+            String errorMessage = "Пользователь с id: " + id + " не найден.";
+            log.warn(errorMessage);
+            //throw ErrorHandler.notFoundException(new NotFoundException(errorMessage));
+            return null;
+        } else {
+            Set<Integer> friendsIds = current.getFriends();
+            Set<User> friends = new HashSet<>();
+            for (int curId: friendsIds) {
+                friends.add(userStorage.findAll().get(curId));
+            }
+            //log.debug("Нужный пользователь: {}", current);
+            return friends;
+        }
+    }
+
+    @PutMapping("/users/{id}/friends/{friendId}")
+    public ResponseEntity<?> addFriend(@RequestBody @PathVariable Integer id, @PathVariable Integer friendId) {
+                    String response = userService.addFriend(id, friendId);
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/users/{id}/friends/{friendId}")
+    public ResponseEntity<?> removeFriend(@RequestBody @PathVariable Integer id, @PathVariable Integer friendId) {
+        String response = userService.removeFriend(id, friendId);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/users/{id}/friends/common/{friendId}")
+    public Set<User> getCommonFriends(@RequestBody @PathVariable Integer id, @PathVariable Integer friendId) {
+        List<Integer> crossFriendsIds = userService.getCrossFriends(id, friendId);
+        Set<User> friends = new HashSet<>();
+        for (int curId: crossFriendsIds) {
+            friends.add(userStorage.findAll().get(curId));
+        }
+        return friends;
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

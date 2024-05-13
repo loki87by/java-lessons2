@@ -2,14 +2,14 @@ package com.example.filmorate.storage;
 
 import com.example.filmorate.model.Film;
 
-//import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-//@Component
+@Component
 public class InMemoryFilmStorage implements FilmStorage {
 
     private final HashMap<Integer, Film> films = new HashMap<>();

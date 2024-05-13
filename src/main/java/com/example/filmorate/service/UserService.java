@@ -17,23 +17,33 @@ public class UserService {
         this.userStorage = userStorage;
     }
 
-    public void addFriend(int firstId, int secondId) {
+    public String addFriend(int firstId, int secondId) {
         User firstUser = userStorage.findAll().get(firstId);
         User secondUser = userStorage.findAll().get(secondId);
 
         if (firstUser != null && secondUser != null) {
             firstUser.getFriends().add(secondId);
             secondUser.getFriends().add(firstId);
+            return "Пользователи с id="+firstId+" и id="+secondId+" стали друзьями.";
+        } else if (firstUser == null) {
+            return "Пользователь с id="+firstId+" не найден.";
+        } else {
+            return "Пользователь с id="+secondId+" не найден.";
         }
     }
 
-    public void removeFriend(int firstId, int secondId) {
+    public String removeFriend(int firstId, int secondId) {
         User firstUser = userStorage.findAll().get(firstId);
         User secondUser = userStorage.findAll().get(secondId);
 
         if (firstUser != null && secondUser != null) {
             firstUser.getFriends().remove(secondId);
             secondUser.getFriends().remove(firstId);
+            return "Пользователи с id="+firstId+" и id="+secondId+" перестали дружить.";
+        } else if (firstUser == null) {
+            return "Пользователь с id="+firstId+" не найден.";
+        } else {
+            return "Пользователь с id="+secondId+" не найден.";
         }
     }
 
