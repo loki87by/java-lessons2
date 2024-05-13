@@ -98,19 +98,19 @@ public class UserController {
     }
 
     @PutMapping("/users/{id}/friends/{friendId}")
-    public ResponseEntity<?> addFriend(@RequestBody @PathVariable Integer id, @PathVariable Integer friendId) {
+    public ResponseEntity<?> addFriend(@PathVariable Integer id, @PathVariable Integer friendId) {
                     String response = userService.addFriend(id, friendId);
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/users/{id}/friends/{friendId}")
-    public ResponseEntity<?> removeFriend(@RequestBody @PathVariable Integer id, @PathVariable Integer friendId) {
+    public ResponseEntity<?> removeFriend(@PathVariable Integer id, @PathVariable Integer friendId) {
         String response = userService.removeFriend(id, friendId);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/users/{id}/friends/common/{friendId}")
-    public Set<User> getCommonFriends(@RequestBody @PathVariable Integer id, @PathVariable Integer friendId) {
+    public Set<User> getCommonFriends(@PathVariable Integer id, @PathVariable Integer friendId) {
         List<Integer> crossFriendsIds = userService.getCrossFriends(id, friendId);
         Set<User> friends = new HashSet<>();
         for (int curId: crossFriendsIds) {

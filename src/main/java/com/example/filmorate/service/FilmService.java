@@ -20,26 +20,35 @@ public class FilmService {
         this.filmStorage = filmStorage;
     }
 
-    public void like(int filmId, int userId) {
+    public String like(int filmId, int userId) {
         Film current = filmStorage.findAll().get(filmId);
 
         if (current != null) {
             current.getLikes().add(userId);
+            return "Лайк поставлен.";
         }
+        return "Фильм с id="+filmId+" не найден.";
     }
 
-    public void dislike(int filmId, int userId) {
+    public String dislike(int filmId, int userId) {
         Film current = filmStorage.findAll().get(filmId);
 
         if (current != null) {
             current.getLikes().remove(userId);
+            return "Лайк отменен.";
         }
+        return "Фильм с id="+filmId+" не найден.";
     }
 
-    public List<Film> getMostPopular() {
+    public List<Film> getMostPopular(int length) {
         List<Film> liked = new ArrayList<>(filmStorage.findAll().values().stream().filter(x ->
                 !x.getLikes().isEmpty()).toList());
+        if (liked.size() < length) {
+            liked = new ArrayList<>(filmStorage.findAll().values());
+        }
         liked.sort(Comparator.comparingInt(film -> film.getLikes().size()));
-        return liked.subList(0, 10);
+        liked = liked.reversed();
+        int size = Math.min(length, liked.size());
+        return liked.subList(0, size);
     }
 }

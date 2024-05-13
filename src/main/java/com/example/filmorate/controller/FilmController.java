@@ -1,6 +1,7 @@
 package com.example.filmorate.controller;
 
 import com.example.filmorate.model.Film;
+import com.example.filmorate.service.FilmService;
 import com.example.filmorate.storage.FilmStorage;
 
 import lombok.extern.slf4j.Slf4j;
@@ -17,10 +18,12 @@ import java.util.List;
 @Slf4j
 public class FilmController {
     private final FilmStorage filmStorage;
+    private final FilmService filmService;
 
     @Autowired
-    public FilmController(FilmStorage filmStorage) {
+    public FilmController(FilmStorage filmStorage, FilmService filmService) {
         this.filmStorage = filmStorage;
+        this.filmService = filmService;
     }
 
     @GetMapping("/films")
@@ -51,5 +54,23 @@ public class FilmController {
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(updateFilmRes);
         }
+    }
+
+    @PutMapping("/films/{id}/like/{userId}")
+    public ResponseEntity<?> like(@PathVariable Integer id, @PathVariable Integer userId) {
+        String response = filmService.like(id, userId);
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/films/{id}/like/{userId}")
+    public ResponseEntity<?> dislike(@PathVariable Integer id, @PathVariable Integer userId) {
+        String response = filmService.dislike(id, userId);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/films/popular")
+    public List<Film> getMostPopular(
+                                     @RequestParam(required = false, defaultValue = "10") Integer count) {
+        return filmService.getMostPopular(count);
     }
 }
