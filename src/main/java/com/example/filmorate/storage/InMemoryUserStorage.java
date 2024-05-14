@@ -1,9 +1,12 @@
 package com.example.filmorate.storage;
 
 import com.example.filmorate.model.User;
+
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,6 +35,7 @@ public class InMemoryUserStorage implements UserStorage {
         List<Object> resultsList = new ArrayList<>();
 
         int id;
+
         if (!users.isEmpty()) {
             id = users.size() * 13;
         } else {
@@ -44,12 +48,13 @@ public class InMemoryUserStorage implements UserStorage {
             resultsList.add(errorMessage);
         }
 
-        if (user.getLogin() == null || user.getLogin().contains(" ")) {
-            String errorMessage = "Логин обязателен и не может содержать пробелы.";
+        if (user.getLogin() == null || user.getLogin().contains(" ") || user.getLogin().isEmpty()) {
+            String errorMessage = "Логин обязателен, не может быть пустым или содержать пробелы.";
             resultsList.add(errorMessage);
         }
 
-        if (user.getBirthday() != null && user.getBirthday().isAfter(Instant.now())) {
+        if (user.getBirthday() != null && LocalDate.parse(user.getBirthday())
+                .atStartOfDay(ZoneId.systemDefault()).toInstant().isAfter(Instant.now())) {
             String errorMessage = "Пришельцам из будущего доступ запрещен.";
             resultsList.add(errorMessage);
         }
@@ -67,18 +72,23 @@ public class InMemoryUserStorage implements UserStorage {
             int id = user.getId();
 
             User currentUser = users.get(id);
+
             if (currentUser == null) {
                 return create(user);
             } else {
+
                 if (user.getBirthday() != null) {
                     currentUser.setBirthday(user.getBirthday());
                 }
+
                 if (user.getLogin() != null && !user.getLogin().isEmpty()) {
                     currentUser.setLogin(user.getLogin());
                 }
+
                 if (user.getName() != null && !user.getName().isEmpty()) {
                     currentUser.setName(user.getName());
                 }
+
                 if (user.getEmail() != null && !user.getEmail().isEmpty()) {
                     currentUser.setEmail(user.getEmail());
                 }

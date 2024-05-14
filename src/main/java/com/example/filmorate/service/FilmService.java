@@ -3,6 +3,7 @@ package com.example.filmorate.service;
 import com.example.filmorate.model.Film;
 import com.example.filmorate.storage.FilmStorage;
 
+import jakarta.validation.NoProviderFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,7 +28,8 @@ public class FilmService {
             current.getLikes().add(userId);
             return "Лайк поставлен.";
         }
-        return "Фильм с id="+filmId+" не найден.";
+        String error = "Фильм с id=" + filmId + " не найден.";
+        throw new NoProviderFoundException(error);
     }
 
     public String dislike(int filmId, int userId) {
@@ -37,7 +39,8 @@ public class FilmService {
             current.getLikes().remove(userId);
             return "Лайк отменен.";
         }
-        return "Фильм с id="+filmId+" не найден.";
+        String error = "Фильм с id=" + filmId + " не найден.";
+        throw new NoProviderFoundException(error);
     }
 
     public List<Film> getMostPopular(int length) {

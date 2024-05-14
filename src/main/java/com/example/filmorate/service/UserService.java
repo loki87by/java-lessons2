@@ -1,6 +1,10 @@
 package com.example.filmorate.service;
+
 import com.example.filmorate.model.User;
 import com.example.filmorate.storage.UserStorage;
+
+import jakarta.validation.NoProviderFoundException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,11 +28,13 @@ public class UserService {
         if (firstUser != null && secondUser != null) {
             firstUser.getFriends().add(secondId);
             secondUser.getFriends().add(firstId);
-            return "Пользователи с id="+firstId+" и id="+secondId+" стали друзьями.";
+            return "Пользователи с id=" + firstId + " и id=" + secondId + " стали друзьями.";
         } else if (firstUser == null) {
-            return "Пользователь с id="+firstId+" не найден.";
+            String errorMessage = "Пользователь с id=" + firstId + " не найден.";
+            throw new NoProviderFoundException(errorMessage);
         } else {
-            return "Пользователь с id="+secondId+" не найден.";
+            String errorMessage = "Пользователь с id=" + secondId + " не найден.";
+            throw new NoProviderFoundException(errorMessage);
         }
     }
 
@@ -39,11 +45,13 @@ public class UserService {
         if (firstUser != null && secondUser != null) {
             firstUser.getFriends().remove(secondId);
             secondUser.getFriends().remove(firstId);
-            return "Пользователи с id="+firstId+" и id="+secondId+" перестали дружить.";
+            return "Пользователи с id=" + firstId + " и id=" + secondId + " перестали дружить.";
         } else if (firstUser == null) {
-            return "Пользователь с id="+firstId+" не найден.";
+            String errorMessage = "Пользователь с id=" + firstId + " не найден.";
+            throw new NoProviderFoundException(errorMessage);
         } else {
-            return "Пользователь с id="+secondId+" не найден.";
+            String errorMessage = "Пользователь с id=" + secondId + " не найден.";
+            throw new NoProviderFoundException(errorMessage);
         }
     }
 
@@ -55,10 +63,10 @@ public class UserService {
         if (firstUser != null && secondUser != null) {
             Set<Integer> firstFriendList = firstUser.getFriends();
             Set<Integer> secondFriendList = secondUser.getFriends();
-            for (int id:firstFriendList) {
-                for (int friendId:secondFriendList) {
+            for (int id : firstFriendList) {
+                for (int friendId : secondFriendList) {
 
-                    if(id == friendId) {
+                    if (id == friendId) {
                         crossFriends.add(id);
                     }
                 }

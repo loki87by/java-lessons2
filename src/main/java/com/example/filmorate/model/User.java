@@ -4,7 +4,6 @@ import jakarta.validation.constraints.Email;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -16,10 +15,10 @@ public class User {
     private String email;
     private String login;
     private String name;
-    private Instant birthday;
+    private String birthday = null;
     private Set<Integer> friends = new HashSet<>();
 
-    public User(int id, String email, String login, String name, Instant birthday) {
+    public User(int id, String email, String login, String name, String birthday) {
         this.id = id;
         this.email = email;
         this.login = login;

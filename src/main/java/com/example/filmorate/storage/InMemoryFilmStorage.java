@@ -5,6 +5,8 @@ import com.example.filmorate.model.Film;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,6 +15,8 @@ import java.util.List;
 public class InMemoryFilmStorage implements FilmStorage {
 
     private final HashMap<Integer, Film> films = new HashMap<>();
+
+    String minDate = "1895-12-28T00:00:00Z";
 
     @Override
     public HashMap<Integer, Film> findAll() {
@@ -42,9 +46,8 @@ public class InMemoryFilmStorage implements FilmStorage {
             result.add(errorMessage);
         }
 
-        String minDate = "1895-12-28T00:00:00Z";
-
-        if (film.getReleaseDate().isBefore(Instant.parse(minDate))) {
+        if (LocalDate.parse(film.getReleaseDate())
+                .atStartOfDay(ZoneId.systemDefault()).toInstant().isBefore(Instant.parse(minDate))) {
             String errorMessage = "До 28 декабря 1985 фильмы не выпускались.";
             result.add(errorMessage);
         }
@@ -71,7 +74,11 @@ public class InMemoryFilmStorage implements FilmStorage {
             if (currentFilm == null) {
                 return create(film);
             } else {
-                currentFilm.setReleaseDate(film.getReleaseDate());
+
+                if (LocalDate.parse(film.getReleaseDate())
+                        .atStartOfDay(ZoneId.systemDefault()).toInstant().isAfter(Instant.parse(minDate))) {
+                    currentFilm.setReleaseDate(film.getReleaseDate());
+                }
 
                 if (film.getDescription() != null && !film.getDescription().isEmpty()) {
                     currentFilm.setDescription(film.getDescription());
