@@ -16,6 +16,7 @@ public class User {
     private String login;
     private String name;
     private String birthday = null;
+    private Set<Integer> invitesToFriends = new HashSet<>();
     private Set<Integer> friends = new HashSet<>();
 
     public User(int id, String email, String login, String name, String birthday) {
