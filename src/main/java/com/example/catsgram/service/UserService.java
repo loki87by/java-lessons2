@@ -1,14 +1,33 @@
 package com.example.catsgram.service;
 
+import com.example.catsgram.dao.UserDao;
 import com.example.catsgram.model.User;
 
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
+import java.util.Optional;
 
 @Service
 public class UserService {
-    private final HashMap<String, User> users = new HashMap<>();
+    private final UserDao userDao;
+
+    public UserService (UserDao userDao) {
+        this.userDao=userDao;
+    }
+
+    public Optional<User> findUserById(String id) {
+        return userDao.findUserById(id);
+    }
+
+    public Optional<User> create(User user) {
+        /*String login = user.getId();
+        String nick = user.getNickname();
+        String name = user.getUsername();*/
+        /*users.put(login, user);
+        return user;*/
+        return userDao.create(user);
+    }
+    /*private final HashMap<String, User> users = new HashMap<>();
 
     public HashMap<String, User> findAll() {
         return users;
@@ -37,5 +56,5 @@ public class UserService {
             }
             return user;
         }
-    }
+    }*/
 }

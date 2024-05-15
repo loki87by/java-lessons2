@@ -2,11 +2,15 @@ package com.example.catsgram.model;
 
 import lombok.*;
 
-import java.time.LocalDate;
-
 @Data
 public class User {
-    private String email;
+    private String id;
+    private String username;
     private String nickname;
-    private LocalDate birthdate;
+
+    public User(String id, String username, String nickname) {
+        this.id = id;
+        this.username = username;
+        this.nickname = nickname;
+    }
 }

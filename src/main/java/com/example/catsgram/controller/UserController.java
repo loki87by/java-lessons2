@@ -1,30 +1,42 @@
 package com.example.catsgram.controller;
 
-import com.example.catsgram.exceptions.NotFoundException;
-import com.example.catsgram.exceptions.UserAlreadyExistException;
-import com.example.catsgram.exceptions.InvalidEmailException;
-import com.example.catsgram.model.ErrorResponse;
 import com.example.catsgram.model.User;
 import com.example.catsgram.service.UserService;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
+import java.util.Optional;
 
 @RestController
+@RequestMapping("/users")
 public class UserController {
     private final UserService userService;
-    private static final Logger log = LoggerFactory.getLogger(UserController.class);
+    //private static final Logger log = LoggerFactory.getLogger(UserController.class);
 
     @Autowired
     public UserController(UserService userService) {
         this.userService = userService;
     }
 
+    @GetMapping("/{login}")
+    public Optional<User> getUser(@PathVariable String login) {
+        return userService.findUserById(login);
+        /*Optional<User> user = userService.findUserById(login);
+        if (user.isPresent()) {
+            return ResponseEntity.ok(user.get());
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ErrorResponse("error", "User with login '" + login + "' not found").getDescription());
+        }*/
+    }
+
+    @PostMapping
+    public Optional<User> create(@RequestBody User user) {
+        return  userService.create(user);
+    }
+/*
     @GetMapping("/users")
     public HashMap<String, User> findAll() {
         log.debug("Текущее количество пользователей: {}", userService.findAll().size());
@@ -79,5 +91,5 @@ public class UserController {
             log.debug("Данные пользователя: {} сохранены", user);
         }
         return userService.update(user);
-    }
+    }*/
 }

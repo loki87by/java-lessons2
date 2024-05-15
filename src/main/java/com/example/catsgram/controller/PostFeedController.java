@@ -1,25 +1,15 @@
 package com.example.catsgram.controller;
 
-import com.example.catsgram.exceptions.IncorrectParameterException;
-import com.example.catsgram.model.ErrorResponse;
-import com.example.catsgram.model.FeedFriendsBody;
+import com.example.catsgram.exceptions.NotFoundException;
 import com.example.catsgram.model.Post;
 import com.example.catsgram.service.PostService;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @RestController
 public class PostFeedController {
@@ -35,7 +25,13 @@ public class PostFeedController {
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED, "фиг тебе");
     }
 
-    @PostMapping(value = "/feed/friends")
+    @GetMapping("/follows")
+    public Collection<Post> findByUser(@RequestParam String userId,
+                                       @RequestParam (required = false, defaultValue = "5") int max) throws NotFoundException {
+        return postService.findFollowers(userId, max);
+    }
+
+    /*@PostMapping(value = "/feed/friends")
     public List<Post> findFriends(@RequestBody String string) throws Exception, ErrorResponse {
         ObjectMapper objectMapper = new ObjectMapper();
         FeedFriendsBody ffb;
@@ -86,8 +82,8 @@ public class PostFeedController {
             }
         }
         response = response.subList(firstIndex, fullSize);
-        /*System.out.println("\u001B[38;5;33m" + "posts: " + posts + "\u001B[0m");
-        System.out.println("\u001b[32m" + "response: " + response + "\u001B[0m");*/
+        System.out.println("\u001B[38;5;33m" + "posts: " + posts + "\u001B[0m");
+        System.out.println("\u001b[32m" + "response: " + response + "\u001B[0m");
         return response;
-    }
+    }*/
 }
