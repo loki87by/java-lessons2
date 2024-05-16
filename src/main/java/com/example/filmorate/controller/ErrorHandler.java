@@ -5,6 +5,7 @@ import com.example.filmorate.storage.UserStorage;
 import jakarta.validation.NoProviderFoundException;
 import jakarta.validation.ValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -19,7 +20,7 @@ public class ErrorHandler {
     private final UserStorage userStorage;
 
     @Autowired
-    public ErrorHandler(UserStorage userStorage) {
+    public ErrorHandler(@Qualifier("userDBStorage") UserStorage userStorage) {
         this.userStorage = userStorage;
     }
 

@@ -7,9 +7,7 @@ import org.springframework.stereotype.Component;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,7 +29,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public List<Object> create(User user) {
+    public Optional<User> create(User user) {
         List<Object> resultsList = new ArrayList<>();
 
         int id;
@@ -41,7 +39,7 @@ public class InMemoryUserStorage implements UserStorage {
         } else {
             id = 1;
         }
-        user.setId(id);
+        //user.setId(id);
 
         if (user.getEmail() == null || isValidEmail(user.getEmail())) {
             String errorMessage = "Email обязателен к заполнению и должен соответствовать стандартам.";
@@ -63,18 +61,19 @@ public class InMemoryUserStorage implements UserStorage {
             users.put(id, user);
             resultsList.add(user);
         }
-        return resultsList;
+        //return resultsList;
+        return Optional.empty();
     }
 
     @Override
     public List<Object> update(User user) {
         try {
-            int id = user.getId();
+            int id = 0;//user.getId();
 
             User currentUser = users.get(id);
 
             if (currentUser == null) {
-                return create(user);
+                return Collections.singletonList(create(user));
             } else {
 
                 if (user.getBirthday() != null) {
@@ -97,15 +96,15 @@ public class InMemoryUserStorage implements UserStorage {
                 return result;
             }
         } catch (NullPointerException e) {
-            int id;
+            /*int id;
 
             if (!users.isEmpty()) {
                 id = users.size() * 13;
             } else {
                 id = 1;
-            }
-            user.setId(id);
-            return create(user);
+            }*/
+            //user.setId(id);
+            return Collections.singletonList(create(user));
         }
     }
 }

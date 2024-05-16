@@ -11,13 +11,11 @@ import jakarta.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @RestController
 @Slf4j
@@ -26,7 +24,7 @@ public class UserController {
     private final UserService userService;
 
     @Autowired
-    public UserController(UserStorage userStorage, UserService userService) {
+    public UserController(@Qualifier("userDBStorage") UserStorage userStorage, UserService userService) {
         this.userStorage = userStorage;
         this.userService = userService;
     }
@@ -39,15 +37,8 @@ public class UserController {
 
     @PostMapping(value = "/users")
     public User create(@Valid @RequestBody User user) {
-
-        List<Object> resultsList = userStorage.create(user);
-
-        if (resultsList.getFirst() instanceof User) {
-            //log.debug("Данные пользователя: {} сохранены", resultsList.getFirst());
-            return (User) resultsList.getFirst();
-        } else {
-            throw new ValidationException(String.valueOf(resultsList));
-        }
+        Optional<User> newUser = userStorage.create(user);
+        return newUser.orElseThrow(() -> new NoProviderFoundException("User not found"));
     }
 
     @PutMapping(value = "/users")
@@ -85,11 +76,11 @@ public class UserController {
             //log.warn(errorMessage);
             throw new NoProviderFoundException(errorMessage);
         } else {
-            Set<Integer> friendsIds = current.getFriends();
+            //Set<Integer> friendsIds = current.getFriends();
             Set<User> friends = new HashSet<>();
-            for (int curId : friendsIds) {
+            /*for (int curId : friendsIds) {
                 friends.add(userStorage.findAll().get(curId));
-            }
+            }*/
             return friends;
         }
     }

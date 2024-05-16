@@ -5,6 +5,7 @@ import com.example.filmorate.storage.FilmStorage;
 
 import jakarta.validation.NoProviderFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -17,7 +18,7 @@ public class FilmService {
     private final FilmStorage filmStorage;
 
     @Autowired
-    public FilmService(FilmStorage filmStorage) {
+    public FilmService(@Qualifier("filmDBStorage") FilmStorage filmStorage) {
         this.filmStorage = filmStorage;
     }
 
