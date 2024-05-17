@@ -1,0 +1,324 @@
+{
+	"info": {
+		"_postman_id": "b2d65eb3-055f-4486-8bee-262eb508ddc3",
+		"name": "Filmorate",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "12336587"
+	},
+	"item": [
+		{
+			"name": "add film",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"catman2\",\r\n    \"releaseDate\": \"1895-12-29\",\r\n    \"description\": \"private HashMap<Integer, Film> films = new HashMap<>();@GetMapping(mspublic  =filmspublicResponseEntity<?> create(@RequestBody Film film)  {\",\r\n    \"duration\": 15\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/films"
+			},
+			"response": []
+		},
+		{
+			"name": "put film",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n        \"id\": 1,\r\n        \"name\": \"\",\r\n        \"description\": \"-15\",\r\n        \"releaseDate\": \"1895-12-27\",\r\n        \"duration\": -150\r\n    }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/films"
+			},
+			"response": []
+		},
+		{
+			"name": "like film",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n        \"id\": 13,\r\n        \"name\": \"catman2\",\r\n        \"description\": \"15\",\r\n        \"releaseDate\": \"1895-12-29T00:00:00Z\",\r\n        \"duration\": 1\r\n    }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/films/1/like/3"
+			},
+			"response": []
+		},
+		{
+			"name": "dislike film",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/films/13/li"
+			},
+			"response": []
+		},
+		{
+			"name": "add user",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"email\": \"t@n.mt\",\r\n    \"login\": \"testuser\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/users"
+			},
+			"response": []
+		},
+		{
+			"name": "upd user",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"id\": 28,\r\n    \"login\": \"null\",\r\n    \"birthday\": \"2014-05-16\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/users"
+			},
+			"response": []
+		},
+		{
+			"name": "add Friend",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"id\": 26,\r\n    \"email\": \"akyla-666@3.pr\",\r\n    \"login\": \"nickname\",\r\n    \"nickname\": \"456\",\r\n    \"birthdate\": \"2015-12-15\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/users/28/friends/22"
+			},
+			"response": []
+		},
+		{
+			"name": "follow",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"id\": 26,\r\n    \"email\": \"akyla-666@3.pr\",\r\n    \"login\": \"nickname\",\r\n    \"nickname\": \"456\",\r\n    \"birthdate\": \"2015-12-15\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/users/25/follow/29"
+			},
+			"response": []
+		},
+		{
+			"name": "get Friends",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"id\": 26,\r\n    \"email\": \"akyla-666@3.pr\",\r\n    \"login\": \"nickname\",\r\n    \"nickname\": \"456\",\r\n    \"birthdate\": \"2015-12-15\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/users/29/friends"
+			},
+			"response": []
+		},
+		{
+			"name": "get followers",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"id\": 26,\r\n    \"email\": \"akyla-666@3.pr\",\r\n    \"login\": \"nickname\",\r\n    \"nickname\": \"456\",\r\n    \"birthdate\": \"2015-12-15\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/users/28/followers"
+			},
+			"response": []
+		},
+		{
+			"name": "get common Friends",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "31: 28, 29\r\n22: 23, 28, 24\r\nres: 28",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/users/31/friends/common/22"
+			},
+			"response": []
+		},
+		{
+			"name": "delete Friend",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"id\": 26,\r\n    \"email\": \"akyla-666@3.pr\",\r\n    \"login\": \"nickname\",\r\n    \"nickname\": \"456\",\r\n    \"birthdate\": \"2015-12-15\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/users/31/friends/28"
+			},
+			"response": []
+		},
+		{
+			"name": "get users",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"author\": \"catman\",\r\n    \"description\": \"atos\",\r\n    \"photoUrl\": \"http://example.com\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/users"
+			},
+			"response": []
+		},
+		{
+			"name": "get user",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"author\": \"catman\",\r\n    \"description\": \"atos\",\r\n    \"photoUrl\": \"http://example.com\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/users/28"
+			},
+			"response": []
+		},
+		{
+			"name": "get films",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "http://localhost:8080/films"
+			},
+			"response": []
+		},
+		{
+			"name": "get best films",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"author\": \"catman\",\r\n    \"description\": \"atos\",\r\n    \"photoUrl\": \"http://example.com\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/films/popular?count=3",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"films",
+						"popular"
+					],
+					"query": [
+						{
+							"key": "count",
+							"value": "3"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

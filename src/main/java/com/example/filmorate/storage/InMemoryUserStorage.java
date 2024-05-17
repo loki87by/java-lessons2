@@ -4,6 +4,7 @@ import com.example.filmorate.model.User;
 
 import org.springframework.stereotype.Component;
 
+import java.sql.ResultSet;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -13,10 +14,14 @@ import java.util.regex.Pattern;
 
 @Component
 public class InMemoryUserStorage implements UserStorage {
-    private final HashMap<Integer, User> users = new HashMap<>();
+    private final List<User> users = new ArrayList<>();
 
     @Override
-    public boolean isValidEmail(String email) {
+    public User makeUsers(ResultSet rs){
+        return null;
+    }
+    @Override
+    public boolean isInvalidEmail(String email) {
         String emailRegex = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
         Pattern pattern = Pattern.compile(emailRegex);
         Matcher matcher = pattern.matcher(email);
@@ -24,7 +29,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public HashMap<Integer, User> findAll() {
+    public List<User> findAll() {
         return users;
     }
 
@@ -32,16 +37,16 @@ public class InMemoryUserStorage implements UserStorage {
     public Optional<User> create(User user) {
         List<Object> resultsList = new ArrayList<>();
 
-        int id;
+        /*int id;
 
         if (!users.isEmpty()) {
             id = users.size() * 13;
         } else {
             id = 1;
         }
-        //user.setId(id);
+        //user.setId(id);*/
 
-        if (user.getEmail() == null || isValidEmail(user.getEmail())) {
+        if (user.getEmail() == null || isInvalidEmail(user.getEmail())) {
             String errorMessage = "Email обязателен к заполнению и должен соответствовать стандартам.";
             resultsList.add(errorMessage);
         }
@@ -58,7 +63,7 @@ public class InMemoryUserStorage implements UserStorage {
         }
 
         if (resultsList.isEmpty()) {
-            users.put(id, user);
+            users.add(user);
             resultsList.add(user);
         }
         //return resultsList;
@@ -66,13 +71,13 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public List<Object> update(User user) {
-        try {
+    public User update(User user) {
+        //try {
             int id = 0;//user.getId();
 
-            User currentUser = users.get(id);
+        return users.get(id);
 
-            if (currentUser == null) {
+            /*if (currentUser == null) {
                 return Collections.singletonList(create(user));
             } else {
 
@@ -96,15 +101,15 @@ public class InMemoryUserStorage implements UserStorage {
                 return result;
             }
         } catch (NullPointerException e) {
-            /*int id;
+            int id;
 
             if (!users.isEmpty()) {
                 id = users.size() * 13;
             } else {
                 id = 1;
-            }*/
-            //user.setId(id);
+            }
+            user.setId(id);
             return Collections.singletonList(create(user));
-        }
+        }*/
     }
 }

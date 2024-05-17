@@ -66,5 +66,3 @@ CREATE TABLE IF NOT EXISTS likes (
         foreign key (user_id)
             references users (id)
 );
-
-

@@ -1,5 +1,6 @@
 package com.example.filmorate.controller;
 
+import com.example.filmorate.model.ErrorResponse;
 import com.example.filmorate.model.User;
 import com.example.filmorate.service.UserService;
 import com.example.filmorate.storage.UserStorage;
@@ -7,7 +8,6 @@ import com.example.filmorate.storage.UserStorage;
 import jakarta.validation.NoProviderFoundException;
 import jakarta.validation.Valid;
 
-import jakarta.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,8 +30,7 @@ public class UserController {
     }
 
     @GetMapping("/users")
-    public HashMap<Integer, User> findAll() {
-        //log.debug("Текущее количество пользователей: {}", userStorage.findAll().size());
+    public List<User> findAll() {
         return userStorage.findAll();
     }
 
@@ -43,46 +42,40 @@ public class UserController {
 
     @PutMapping(value = "/users")
     @ResponseStatus(HttpStatus.CREATED)
-    public User update(@Valid @RequestBody User user) {
-        List<Object> updateUserList = userStorage.update(user);
+    public User update(@Valid @RequestBody User user) throws ErrorResponse {
 
-        if (updateUserList.getFirst() instanceof User) {
-            //log.debug("Данные пользователя: {} сохранены", updateUserList.getFirst());
-            return (User) updateUserList.getFirst();
+        if(user.getId() > 0) {
+            return userStorage.update(user);
         } else {
-            throw new ValidationException(String.valueOf(updateUserList));
+            throw new NoProviderFoundException("'id' обязательное поле");
         }
     }
 
     @GetMapping("/users/{id}")
     public User findById(@RequestBody @PathVariable Integer id) {
-        User current = userStorage.findAll().get(id);
+        List<User> users = userStorage.findAll();
+        return users.stream().filter(u -> u.getId() == id).findFirst().orElseThrow(() ->
+                new NoProviderFoundException("User not found"));
+    }
 
-        if (current == null) {
-            String errorMessage = "Пользователь с id: " + id + " не найден.";
-            //log.warn(errorMessage);
-            throw new NoProviderFoundException(errorMessage);
-        }
-        //log.debug("Нужный пользователь: {}", current);
-        return current;
+    @PostMapping(value = "/users/{id}/follow/{friendId}")
+    public String follow(@PathVariable int id, @PathVariable int friendId) {
+        return userService.follow(id, friendId);
+    }
+
+    @GetMapping("/users/{id}/followers")
+    public List<User> findFollowersById(@RequestBody @PathVariable Integer id) {
+        return userService.findUsersByFriendshipState(id, true);
+    }
+
+    @GetMapping("/users/{id}/follows")
+    public List<User> findFollowsById(@RequestBody @PathVariable Integer id) {
+        return userService.findUsersByFriendshipState(id, false);
     }
 
     @GetMapping("/users/{id}/friends")
-    public Set<User> findFriendsById(@RequestBody @PathVariable Integer id) {
-        User current = userStorage.findAll().get(id);
-
-        if (current == null) {
-            String errorMessage = "Пользователь с id: " + id + " не найден.";
-            //log.warn(errorMessage);
-            throw new NoProviderFoundException(errorMessage);
-        } else {
-            //Set<Integer> friendsIds = current.getFriends();
-            Set<User> friends = new HashSet<>();
-            /*for (int curId : friendsIds) {
-                friends.add(userStorage.findAll().get(curId));
-            }*/
-            return friends;
-        }
+    public List<User> findFriendsById(@RequestBody @PathVariable Integer id) {
+        return userService.findFriendsById(id);
     }
 
     @PutMapping("/users/{id}/friends/{friendId}")
@@ -96,12 +89,12 @@ public class UserController {
     }
 
     @GetMapping("/users/{id}/friends/common/{friendId}")
-    public Set<User> getCommonFriends(@PathVariable Integer id, @PathVariable Integer friendId) {
-        List<Integer> crossFriendsIds = userService.getCrossFriends(id, friendId);
+    public List<User> getCommonFriends(@PathVariable Integer id, @PathVariable Integer friendId) {
+        return userService.getCrossFriends(id, friendId);/*
         Set<User> friends = new HashSet<>();
         for (int curId : crossFriendsIds) {
             friends.add(userStorage.findAll().get(curId));
         }
-        return friends;
+        return friends;*/
     }
 }

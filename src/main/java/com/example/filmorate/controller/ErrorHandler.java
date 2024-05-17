@@ -49,7 +49,7 @@ public class ErrorHandler {
                         if (fieldError.getField().equals("email")) {
                             String emailValue = (String) fieldError.getRejectedValue();
 
-                            if (userStorage.isValidEmail(emailValue)) {
+                            if (userStorage.isInvalidEmail(emailValue)) {
                                 return "Некорректный формат email.";
                             }
                         }
