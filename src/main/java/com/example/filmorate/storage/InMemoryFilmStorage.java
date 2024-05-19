@@ -4,12 +4,14 @@ import com.example.filmorate.model.Film;
 
 import org.springframework.stereotype.Component;
 
+import java.sql.ResultSet;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
@@ -19,12 +21,17 @@ public class InMemoryFilmStorage implements FilmStorage {
     String minDate = "1895-12-28T00:00:00Z";
 
     @Override
-    public HashMap<Integer, Film> findAll() {
-        return films;
+    public Film makeFilms(ResultSet rs) {
+        return null;
     }
 
     @Override
-    public List<Object> create(Film film) {
+    public List<Film> findAll() {
+        return null;
+    }
+
+    @Override
+    public Optional<Film> create(Film film) {
         List<Object> result = new ArrayList<>();
         int id;
 
@@ -61,18 +68,18 @@ public class InMemoryFilmStorage implements FilmStorage {
             films.put(id, film);
             result.add(film);
         }
-        return result;
+        return Optional.empty();
     }
 
     @Override
-    public List<Object> update(Film film) {
+    public Film update(Film film) {
         try {
             int id = film.getId();
 
             Film currentFilm = films.get(id);
 
             if (currentFilm == null) {
-                return create(film);
+                return /*create(film)*/null;
             } else {
 
                 if (LocalDate.parse(film.getReleaseDate())
@@ -92,9 +99,9 @@ public class InMemoryFilmStorage implements FilmStorage {
                     currentFilm.setDuration(film.getDuration());
                 }
 
-                List<Object> result = new ArrayList<>();
-                result.add(currentFilm);
-                return result;
+                /*List<Object> result = new ArrayList<>();
+                result.add(currentFilm);*/
+                return null;
             }
         } catch (NullPointerException e) {
             int id;
@@ -105,7 +112,7 @@ public class InMemoryFilmStorage implements FilmStorage {
                 id = 1;
             }
             film.setId(id);
-            return create(film);
+            return /*create(film)*/null;
         }
     }
 }

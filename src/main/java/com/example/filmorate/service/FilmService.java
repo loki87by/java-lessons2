@@ -8,10 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-
 @Service
 public class FilmService {
 
@@ -44,7 +40,7 @@ public class FilmService {
         throw new NoProviderFoundException(error);
     }
 
-    public List<Film> getMostPopular(int length) {
+    /*public List<Film> getMostPopular(int length) {
         List<Film> liked = new ArrayList<>(filmStorage.findAll().values().stream().filter(x ->
                 !x.getLikes().isEmpty()).toList());
         if (liked.size() < length) {
@@ -54,5 +50,5 @@ public class FilmService {
         liked = liked.reversed();
         int size = Math.min(length, liked.size());
         return liked.subList(0, size);
-    }
+    }*/
 }

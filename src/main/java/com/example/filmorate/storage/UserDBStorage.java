@@ -31,7 +31,6 @@ public class UserDBStorage implements UserStorage {
 
     @Override
     public User makeUsers(ResultSet rs) throws SQLException {
-        System.out.println("id: "+                rs.getInt("id"));
         return new User(
                 rs.getString("email"),
                 rs.getString("login"),
