@@ -35,27 +35,11 @@ public class FilmController {
     @PostMapping(value = "/films")
     public Film create(@RequestBody Film film) {
         Optional<Film> newFilm = filmStorage.create(film);
-        return newFilm.orElseThrow(() -> new NoProviderFoundException("User not found"));
-        /*List<Object> createFilmRes = filmStorage.create(film);
-
-        if (createFilmRes.getFirst() instanceof Film) {
-            //log.debug("Данные фильма: {} сохранены", createFilmRes.getFirst());
-            return (Film) createFilmRes.getFirst();
-        } else {
-            throw new ValidationException(String.valueOf(createFilmRes));
-        }*/
+        return newFilm.orElseThrow(() -> new NoProviderFoundException("Film not found"));
     }
 
     @PutMapping(value = "/films")
     public Film update(@RequestBody Film film) {
-        /*List<Object> updateFilmRes = filmStorage.update(film);
-
-        if (updateFilmRes.getFirst() instanceof Film) {
-            //log.debug("Данные фильма: {} сохранены", updateFilmRes.getFirst());
-            return (Film) updateFilmRes.getFirst();
-        } else {
-            throw new ValidationException(String.valueOf(updateFilmRes));
-        }*/
 
         if(film.getId() > 0) {
             return filmStorage.update(film);
@@ -74,9 +58,9 @@ public class FilmController {
         return filmService.dislike(id, userId);
     }
 
-    /*@GetMapping("/films/popular")
+    @GetMapping("/films/popular")
     public List<Film> getMostPopular(
             @RequestParam(required = false, defaultValue = "10") Integer count) {
         return filmService.getMostPopular(count);
-    }*/
+    }
 }

@@ -11,41 +11,80 @@ import java.sql.SQLException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Component
 public class FilmDBStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
     String minDate = "1895-12-28T00:00:00Z";
+
     public FilmDBStorage(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate=jdbcTemplate;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override
     public Film makeFilms(ResultSet rs) throws SQLException {
-        return new Film(
+
+        Film film = new Film(
                 rs.getInt("id"),
                 rs.getString("name"),
                 rs.getString("description"),
                 rs.getString("releaseDate"),
-                rs.getInt("duration")
+                rs.getInt("duration"),
+                rs.getInt("mpa_Rating_ID")
         );
+        String getLikesSql = "select count(*) from likes where film_id = ?;";
+        Integer count = jdbcTemplate.queryForObject(getLikesSql, Integer.class, rs.getInt("id"));
+        film.setLikes(count);
+        film.setGenre(getGenres(rs.getInt("id")));
+        return film;
     }
+
     @Override
     public List<Film> findAll() {
         String sql = "SELECT * FROM films;";
         return jdbcTemplate.query(sql, (rs, rowNum) -> makeFilms(rs));
     }
 
+    private Set<Integer> getGenres (int id) {
+        String setGenreSql = "select genre_id from film_genres where film_id = ?;";
+        return new HashSet<>(jdbcTemplate.query(setGenreSql, (rs, rowNum) -> rs.getInt("genre_id"), id));
+    }
+
+    private Set<Integer> genreChecker(Set<Integer> genre, int id) {
+        String oldGenreSql = "delete from film_genres where film_id = ?;";
+        jdbcTemplate.update(oldGenreSql, id);
+        for (int genreId : genre) {
+
+            if (genreId > 0 && genreId <= 6) {
+                String newGenreSql = "INSERT INTO film_genres (film_id, genre_id) VALUES (?, ?);";
+                jdbcTemplate.update(newGenreSql, id, genreId);
+            }
+        }
+
+        return getGenres(id);
+    }
+
+    private void checkMpaRating(int rating) {
+
+        if (rating < 1 || rating > 5) {
+            String sqlMpaQuery = "SELECT id, type FROM mpa_rating;";
+            List<String> resultList = jdbcTemplate.query(sqlMpaQuery, (rs, rowNum) -> rs.getInt("id") + " - " +
+                    rs.getString("type"));
+            String listString = String.join(", ", resultList);
+            String errorMessage = "Mpa-рейтинг должен быть от 1 до 5 из следующего списка: \n" +
+                    listString +
+                    "\n по умолчанию ограничения строжайшие.";
+            throw new ValidationException(errorMessage);
+        }
+    }
+
     @Override
     public Optional<Film> create(Film film) {
         String errorMessage;
 
-        if (film.getName() == null) {
-            errorMessage = "Название обязательно к заполнению.";
+        if (film.getName() == null || film.getName().isEmpty()) {
+            errorMessage = "Название обязательно к заполнению и не может быть пустым.";
             throw new ValidationException(errorMessage);
         }
 
@@ -66,36 +105,17 @@ public class FilmDBStorage implements FilmStorage {
             throw new ValidationException(errorMessage);
         }
 
-        if (film.getMpaRating() < 0) {
-            System.out.println("film.getMpaRating()Ж "+film.getMpaRating());
-            String sqlMpaQuery = "SELECT id, type FROM mpa_rating;";
-            List<String> resultList = jdbcTemplate.query(sqlMpaQuery, (rs, rowNum) -> rs.getInt("id") + " - " +
-                    rs.getString("type"));
-            String listString = String.join(", ", resultList);
-            errorMessage = "Mpa-рейтинг должен быть от 1 до 5 из следующего списка: \n" +
-                    listString +
-                    "\n или 0 если неизвестно";
-            throw new ValidationException(errorMessage);
-        }
+        checkMpaRating(film.getMpaRating());
 
-        String sql = "INSERT INTO films (name, description, releaseDate, duration, mpa_rating_id) VALUES (?, ?, ?, ?";
+        String sql = "INSERT INTO films (name, description, releaseDate, duration, mpa_rating_id) VALUES (?, ?, ?, ?, ?)";
 
-        if (film.getMpaRating() > 0 && film.getMpaRating() < 6) {
-            sql += ", ?)";
-        } else {
-            sql += ", 0)";
-        }
-        String finalSql = sql;
         int rowsAffected = jdbcTemplate.update(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement(finalSql);
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, film.getName());
             preparedStatement.setString(2, film.getDescription());
             preparedStatement.setString(3, film.getReleaseDate());
             preparedStatement.setInt(4, film.getDuration());
-
-            if (film.getMpaRating() > 0 && film.getMpaRating() < 6) {
-                preparedStatement.setInt(5, film.getMpaRating());
-            }
+            preparedStatement.setInt(5, film.getMpaRating());
             return preparedStatement;
         });
 
@@ -115,9 +135,8 @@ public class FilmDBStorage implements FilmStorage {
         int id = film.getId();
         String errorMessage;
 
-        if (LocalDate.parse(film.getReleaseDate())
-                .atStartOfDay(ZoneId.systemDefault()).toInstant().isBefore(Instant.parse(minDate))) {
-            errorMessage = "До 28 декабря 1985 фильмы не выпускались.";
+        if (film.getName() != null && film.getName().isEmpty()) {
+            errorMessage = "Название обязательно к заполнению и не может быть пустым.";
             throw new ValidationException(errorMessage);
         }
 
@@ -127,15 +146,18 @@ public class FilmDBStorage implements FilmStorage {
             throw new ValidationException(errorMessage);
         }
 
-        if (film.getName().isEmpty()) {
-            errorMessage = "Название обязательно к заполнению.";
+        if (film.getReleaseDate() != null && LocalDate.parse(film.getReleaseDate())
+                .atStartOfDay(ZoneId.systemDefault()).toInstant().isBefore(Instant.parse(minDate))) {
+            errorMessage = "До 28 декабря 1985 фильмы не выпускались.";
             throw new ValidationException(errorMessage);
         }
 
-        if (film.getDuration() <= 0) {
+        if (film.getDuration() != null && film.getDuration() <= 0) {
             errorMessage = "Продолжительность должна быть положительной.";
             throw new ValidationException(errorMessage);
         }
+
+        checkMpaRating(film.getMpaRating());
 
         HashMap<String, String> filmParams = new HashMap<>();
 
@@ -149,6 +171,7 @@ public class FilmDBStorage implements FilmStorage {
         List<Object> paramValues = new ArrayList<>();
 
         for (String key : filmParams.keySet()) {
+
             if (filmParams.get(key) != null) {
                 notNullParamsList.add(key + " = ?");
                 paramValues.add(filmParams.get(key));
@@ -157,6 +180,10 @@ public class FilmDBStorage implements FilmStorage {
         String sql = sqlStart + String.join(", ", notNullParamsList) + " WHERE id = ?";
         paramValues.add(id);
         int rowsAffected = jdbcTemplate.update(sql, paramValues.toArray());
+
+        if (!film.getGenre().isEmpty()) {
+            rowsAffected += genreChecker(film.getGenre(), id).size();
+        }
 
         if (rowsAffected > 0) {
             String sqlQuery = "SELECT * from films where id = ?;";
