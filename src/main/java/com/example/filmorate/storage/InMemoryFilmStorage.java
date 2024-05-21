@@ -2,6 +2,7 @@ package com.example.filmorate.storage;
 
 import com.example.filmorate.model.Film;
 
+import com.example.filmorate.model.TypeIdEntity;
 import org.springframework.stereotype.Component;
 
 import java.sql.ResultSet;
@@ -19,6 +20,16 @@ public class InMemoryFilmStorage implements FilmStorage {
     private final HashMap<Integer, Film> films = new HashMap<>();
 
     String minDate = "1895-12-28T00:00:00Z";
+
+    @Override
+    public List<TypeIdEntity> getAllMpa() {
+        return null;
+    }
+
+    @Override
+    public TypeIdEntity getMpaById(Integer id) {
+        return null;
+    }
 
     @Override
     public Film makeFilms(ResultSet rs) {
@@ -114,5 +125,15 @@ public class InMemoryFilmStorage implements FilmStorage {
             film.setId(id);
             return /*create(film)*/null;
         }
+    }
+
+    @Override
+    public List<TypeIdEntity> getAllGenres() {
+        return null;
+    }
+
+    @Override
+    public TypeIdEntity getGenreById(Integer id) {
+        return null;
     }
 }

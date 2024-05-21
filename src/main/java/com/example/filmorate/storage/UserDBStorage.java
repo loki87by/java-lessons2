@@ -14,7 +14,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
@@ -61,7 +60,13 @@ public class UserDBStorage implements UserStorage {
     @Override
     public List<User> findAll() {
         String sql = "SELECT * FROM users;";
-        return jdbcTemplate.query(sql, (rs, rowNum) -> makeUsers(rs));
+        return jdbcTemplate.query(sql, (rs, _) -> makeUsers(rs));
+    }
+
+    @Override
+    public Optional<User> findById (Integer id) {
+        String sql = "SELECT * FROM users where id = ?;";
+        return Optional.ofNullable(jdbcTemplate.query(sql, (rs, _) -> makeUsers(rs), id).getFirst());
     }
 
     @Override
@@ -134,22 +139,11 @@ public class UserDBStorage implements UserStorage {
         userParams.put("name", user.getName());
         userParams.put("birthday", user.getBirthday());
         String sqlStart = "UPDATE users SET ";
-        List<String> notNullParamsList = new ArrayList<>();
-        List<Object> paramValues = new ArrayList<>();
-
-        for (String key : userParams.keySet()) {
-            if (userParams.get(key) != null) {
-                notNullParamsList.add(key + " = ?");
-                paramValues.add(userParams.get(key));
-            }
-        }
-        String sql = sqlStart + String.join(", ", notNullParamsList) + " WHERE id = ?";
-        paramValues.add(id);
-        int rowsAffected = jdbcTemplate.update(sql, paramValues.toArray());
+        int rowsAffected = FilmDBStorage.getSqlWithParams(id, userParams, sqlStart, jdbcTemplate);
 
         if (rowsAffected > 0) {
             String sqlQuery = "SELECT * from users where id = ?;";
-            return jdbcTemplate.query(sqlQuery, (rs, rowNum) -> makeUsers(rs), id).getFirst();
+            return jdbcTemplate.query(sqlQuery, (rs, _) -> makeUsers(rs), id).getFirst();
         }
         return null;
     }
@@ -161,4 +155,5 @@ public class UserDBStorage implements UserStorage {
         Matcher matcher = pattern.matcher(emailValue);
         return !matcher.matches();
     }
+
 }

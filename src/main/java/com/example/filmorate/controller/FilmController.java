@@ -1,6 +1,7 @@
 package com.example.filmorate.controller;
 
 import com.example.filmorate.model.Film;
+import com.example.filmorate.model.TypeIdEntity;
 import com.example.filmorate.service.FilmService;
 import com.example.filmorate.storage.FilmStorage;
 
@@ -62,5 +63,25 @@ public class FilmController {
     public List<Film> getMostPopular(
             @RequestParam(required = false, defaultValue = "10") Integer count) {
         return filmService.getMostPopular(count);
+    }
+
+    @GetMapping("/genres")
+    public List<TypeIdEntity> getGenres() {
+        return filmStorage.getAllGenres();
+    }
+
+    @GetMapping("/genres/{id}")
+    public TypeIdEntity getGenres(@PathVariable Integer id) {
+        return filmStorage.getGenreById(id);
+    }
+
+    @GetMapping("/mpa")
+    public List<TypeIdEntity> getRatings() {
+        return filmStorage.getAllMpa();
+    }
+
+    @GetMapping("/mpa/{id}")
+    public TypeIdEntity getRatings(@PathVariable Integer id) {
+        return filmStorage.getMpaById(id);
     }
 }

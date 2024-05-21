@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "b2d65eb3-055f-4486-8bee-262eb508ddc3",
+		"_postman_id": "cbde8595-98fa-4870-9df4-47ff712df172",
 		"name": "Filmorate",
 		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
 		"_exporter_id": "12336587"
@@ -74,7 +74,7 @@
 						}
 					}
 				},
-				"url": "http://localhost:8080/films/13/li"
+				"url": "http://localhost:8080/films/13/like/7"
 			},
 			"response": []
 		},
@@ -249,6 +249,90 @@
 					}
 				},
 				"url": "http://localhost:8080/users"
+			},
+			"response": []
+		},
+		{
+			"name": "get genres",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"author\": \"catman\",\r\n    \"description\": \"atos\",\r\n    \"photoUrl\": \"http://example.com\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/genres"
+			},
+			"response": []
+		},
+		{
+			"name": "get genre by id",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"author\": \"catman\",\r\n    \"description\": \"atos\",\r\n    \"photoUrl\": \"http://example.com\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/genres/7"
+			},
+			"response": []
+		},
+		{
+			"name": "get mpa by id",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"author\": \"catman\",\r\n    \"description\": \"atos\",\r\n    \"photoUrl\": \"http://example.com\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/mpa/8"
+			},
+			"response": []
+		},
+		{
+			"name": "get all mpa",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"author\": \"catman\",\r\n    \"description\": \"atos\",\r\n    \"photoUrl\": \"http://example.com\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/mpa"
 			},
 			"response": []
 		},

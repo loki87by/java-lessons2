@@ -1,6 +1,8 @@
 package com.example.filmorate.storage;
 
 import com.example.filmorate.model.Film;
+import com.example.filmorate.model.TypeIdEntity;
+import jakarta.validation.NoProviderFoundException;
 import jakarta.validation.ValidationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -22,6 +24,49 @@ public class FilmDBStorage implements FilmStorage {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    private Set<Integer> getGenres(int id) {
+        String setGenreSql = "select genre_id from film_genres where film_id = ?;";
+        return new HashSet<>(jdbcTemplate.query(setGenreSql, (rs, _) -> rs.getInt("genre_id"), id));
+    }
+
+    private List<TypeIdEntity> getAllTypeIdEntity(String table) {
+        String getSql = STR."select * from \{table}";
+        return new ArrayList<>(jdbcTemplate.query(getSql, (rs, _) -> new TypeIdEntity(
+                rs.getInt("id"),
+                rs.getString("type"))));
+    }
+
+    private TypeIdEntity getTypeIdEntityById(Integer id, String table, String[] errorEntityArgs) {
+        String getGenresSql = STR."select * from \{table} where id=?";
+        try {
+            return jdbcTemplate.query(getGenresSql, (rs, _) -> new TypeIdEntity(
+                    rs.getInt("id"),
+                    rs.getString("type")), id).getFirst();
+        } catch (NoSuchElementException e) {
+            throw new NoProviderFoundException(STR."\{errorEntityArgs[0]} с 'id=\{id}\{errorEntityArgs[1]}.");
+        }
+    }
+
+    @Override
+    public List<TypeIdEntity> getAllGenres() {
+        return getAllTypeIdEntity("genres");
+    }
+
+    @Override
+    public TypeIdEntity getGenreById(Integer id) {
+        return getTypeIdEntityById(id, "genres", new String[]{"Нет записи о жанре", "'"});
+    }
+
+    @Override
+    public List<TypeIdEntity> getAllMpa() {
+        return getAllTypeIdEntity("mpa_rating");
+    }
+
+    @Override
+    public TypeIdEntity getMpaById(Integer id) {
+        return getTypeIdEntityById(id, "mpa_rating", new String[]{"Mpa-рейтинг ", "' не найден"});
+    }
+
     @Override
     public Film makeFilms(ResultSet rs) throws SQLException {
 
@@ -40,18 +85,29 @@ public class FilmDBStorage implements FilmStorage {
         return film;
     }
 
+    public static int getSqlWithParams(int id, HashMap<String, String> filmParams, String sqlStart, JdbcTemplate jdbcTemplate) {
+        List<String> notNullParamsList = new ArrayList<>();
+        List<Object> paramValues = new ArrayList<>();
+
+        for (String key : filmParams.keySet()) {
+
+            if (filmParams.get(key) != null) {
+                notNullParamsList.add(STR."\{key} = ?");
+                paramValues.add(filmParams.get(key));
+            }
+        }
+        String sql = STR."\{sqlStart}\{String.join(", ", notNullParamsList)} WHERE id = ?";
+        paramValues.add(id);
+        return jdbcTemplate.update(sql, paramValues.toArray());
+    }
+
     @Override
     public List<Film> findAll() {
         String sql = "SELECT * FROM films;";
-        return jdbcTemplate.query(sql, (rs, rowNum) -> makeFilms(rs));
+        return jdbcTemplate.query(sql, (rs, _) -> makeFilms(rs));
     }
 
-    private Set<Integer> getGenres (int id) {
-        String setGenreSql = "select genre_id from film_genres where film_id = ?;";
-        return new HashSet<>(jdbcTemplate.query(setGenreSql, (rs, rowNum) -> rs.getInt("genre_id"), id));
-    }
-
-    private Set<Integer> genreChecker(Set<Integer> genre, int id) {
+    public Set<Integer> genreChecker(Set<Integer> genre, int id) {
         String oldGenreSql = "delete from film_genres where film_id = ?;";
         jdbcTemplate.update(oldGenreSql, id);
         for (int genreId : genre) {
@@ -69,12 +125,12 @@ public class FilmDBStorage implements FilmStorage {
 
         if (rating < 1 || rating > 5) {
             String sqlMpaQuery = "SELECT id, type FROM mpa_rating;";
-            List<String> resultList = jdbcTemplate.query(sqlMpaQuery, (rs, rowNum) -> rs.getInt("id") + " - " +
-                    rs.getString("type"));
+            List<String> resultList = jdbcTemplate.query(sqlMpaQuery, (rs, _) ->
+                    STR."\{rs.getInt("id")} - \{rs.getString("type")}");
             String listString = String.join(", ", resultList);
-            String errorMessage = "Mpa-рейтинг должен быть от 1 до 5 из следующего списка: \n" +
-                    listString +
-                    "\n по умолчанию ограничения строжайшие.";
+            String errorMessage =
+                    STR."Mpa-рейтинг должен быть от 1 до 5 из следующего списка: \n\{
+                            listString}\n по умолчанию ограничения строжайшие.";
             throw new ValidationException(errorMessage);
         }
     }
@@ -167,19 +223,7 @@ public class FilmDBStorage implements FilmStorage {
         filmParams.put("duration", String.valueOf(film.getDuration()));
         filmParams.put("mpa_rating_id", String.valueOf(film.getMpaRating()));
         String sqlStart = "UPDATE films SET ";
-        List<String> notNullParamsList = new ArrayList<>();
-        List<Object> paramValues = new ArrayList<>();
-
-        for (String key : filmParams.keySet()) {
-
-            if (filmParams.get(key) != null) {
-                notNullParamsList.add(key + " = ?");
-                paramValues.add(filmParams.get(key));
-            }
-        }
-        String sql = sqlStart + String.join(", ", notNullParamsList) + " WHERE id = ?";
-        paramValues.add(id);
-        int rowsAffected = jdbcTemplate.update(sql, paramValues.toArray());
+        int rowsAffected = getSqlWithParams(id, filmParams, sqlStart, jdbcTemplate);
 
         if (!film.getGenre().isEmpty()) {
             rowsAffected += genreChecker(film.getGenre(), id).size();
@@ -187,8 +231,9 @@ public class FilmDBStorage implements FilmStorage {
 
         if (rowsAffected > 0) {
             String sqlQuery = "SELECT * from films where id = ?;";
-            return jdbcTemplate.query(sqlQuery, (rs, rowNum) -> makeFilms(rs), id).getFirst();
+            return jdbcTemplate.query(sqlQuery, (rs, _) -> makeFilms(rs), id).getFirst();
         }
         return null;
     }
+
 }

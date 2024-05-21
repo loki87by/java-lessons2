@@ -53,9 +53,11 @@ public class UserController {
 
     @GetMapping("/users/{id}")
     public User findById(@RequestBody @PathVariable Integer id) {
-        List<User> users = userStorage.findAll();
-        return users.stream().filter(u -> u.getId() == id).findFirst().orElseThrow(() ->
-                new NoProviderFoundException("User not found"));
+        Optional<User> current = userStorage.findById(id);
+        return current.orElseThrow(() -> new NoProviderFoundException("User not found"));
+        //return userStorage.findById(id);
+        /*return users.stream().filter(u -> u.getId() == id).findFirst().orElseThrow(() ->
+                new NoProviderFoundException("User not found"));*/
     }
 
     @PostMapping(value = "/users/{id}/follow/{friendId}")

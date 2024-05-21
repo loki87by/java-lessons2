@@ -16,4 +16,6 @@ public interface UserStorage {
     User update(User user);
 
     boolean isInvalidEmail(String emailValue);
+
+    Optional<User> findById(Integer id);
 }

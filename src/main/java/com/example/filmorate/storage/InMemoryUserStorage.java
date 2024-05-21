@@ -29,6 +29,11 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
+    public Optional<User> findById(Integer id) {
+        return Optional.empty();
+    }
+
+    @Override
     public List<User> findAll() {
         return users;
     }
