@@ -20,14 +20,55 @@ insert into PUBLIC.genres (type) select 'Документальный'
 where not exists (select 1 from PUBLIC.genres where type = 'Документальный');
 insert into PUBLIC.genres (type) select 'Боевик'
 where not exists (select 1 from PUBLIC.genres where type = 'Боевик');
+insert into PUBLIC.feed_realtions (content) select 'На портал добавлен фильм: '
+where not exists (select 1 from PUBLIC.feed_realtions where content = 'На портал добавлен фильм: ');
+insert into PUBLIC.feed_realtions (content) select 'К нам присоединился пользователь: '
+where not exists (select 1 from PUBLIC.feed_realtions where content = 'К нам присоединился пользователь: ');
+insert into PUBLIC.feed_realtions (content) select 'С портала удален фильм: '
+where not exists (select 1 from PUBLIC.feed_realtions where content = 'С портала удален фильм: ');
+insert into PUBLIC.feed_realtions (content) select 'Нас покинул пользователь: '
+where not exists (select 1 from PUBLIC.feed_realtions where content = 'Нас покинул пользователь: ');
+insert into PUBLIC.feed_realtions (content, entity_type) select ' подписался на пользователя: ', 'Пользователь: '
+where not exists (select 1 from PUBLIC.feed_realtions where content = ' подписался на пользователя: ');
+insert into PUBLIC.feed_realtions (content, entity_type) select ' принял в друзья пользователя: ', 'Пользователь: '
+where not exists (select 1 from PUBLIC.feed_realtions where content = ' принял в друзья пользователя: ');
+insert into PUBLIC.feed_realtions (content, entity_type) select ' отписался от пользователя: ', 'Пользователь: '
+where not exists (select 1 from PUBLIC.feed_realtions where content = ' отписался от  пользователя: ');
+insert into PUBLIC.feed_realtions (content, entity_type) select ' удалил из друзей пользователя: ', 'Пользователь: '
+where not exists (select 1 from PUBLIC.feed_realtions where content = ' удалил из друзей пользователя: ');
+insert into PUBLIC.feed_realtions (content, entity_type) select ' прокомментировал фильм: ', 'Пользователь: '
+where not exists (select 1 from PUBLIC.feed_realtions where content = ' прокомментировал фильм: ');
+insert into PUBLIC.feed_realtions (content, entity_type) select ' поставил лайк фильму: ', 'Пользователь: '
+where not exists (select 1 from PUBLIC.feed_realtions where content = ' поставил лайк фильму: ');
+insert into PUBLIC.feed_realtions (content, entity_type) select ' обновлен спивок жанров: ', 'У фильма: '
+where not exists (select 1 from PUBLIC.feed_realtions where content = ' обновлен спивок жанров: ');
+insert into PUBLIC.feed_realtions (content, entity_type) select ' изменилось название с: ', 'У фильма: '
+where not exists (select 1 from PUBLIC.feed_realtions where content = ' изменилось название с: ');
+insert into PUBLIC.feed_realtions (content, entity_type) select ' изменилось описание с: ', 'У фильма: '
+where not exists (select 1 from PUBLIC.feed_realtions where content = ' изменилось описание с: ');
+insert into PUBLIC.feed_realtions (content, entity_type) select ' изменилась дата выхода с: ', 'У фильма: '
+where not exists (select 1 from PUBLIC.feed_realtions where content = ' изменилась дата выхода с: ');
+insert into PUBLIC.feed_realtions (content, entity_type) select ' изменилась продолжительность с: ', 'У фильма: '
+where not exists (select 1 from PUBLIC.feed_realtions where content = ' изменилась продолжительность с: ');
+insert into PUBLIC.feed_realtions (content, entity_type) select ' изменилось возрастное ограничение с: ', 'У фильма: '
+where not exists (select 1 from PUBLIC.feed_realtions where content = ' изменилось возрастное ограничение с: ');
+insert into PUBLIC.feed_realtions (content, entity_type) select ' изменил имя с: ', 'Пользователь: '
+where not exists (select 1 from PUBLIC.feed_realtions where content = ' изменил имя с: ');
+insert into PUBLIC.feed_realtions (content, entity_type) select ' изменил почту с: ', 'Пользователь: '
+where not exists (select 1 from PUBLIC.feed_realtions where content = ' изменил почту с: ');
+insert into PUBLIC.feed_realtions (content, entity_type) select ' поменял дату рождения с: ', 'Пользователь: '
+where not exists (select 1 from PUBLIC.feed_realtions where content = ' поменял дату рождения с: ');
+insert into PUBLIC.feed_realtions (content, entity_type) select ' порекомендовал фильм: ', 'Пользователь: '
+where not exists (select 1 from PUBLIC.feed_realtions where content = ' порекомендовал фильм: ');
 
+--entity1 doing something with entity2 and entity3 (4)
 /*
 select * from mpa_rating;
 select * from genres
 update mpa_rating set id = 1 where type = 'G';
 */
-create table MPA_RATING
+/*create table MPA_RATING
 (
     "'G'" int
-);
+);*/
 
