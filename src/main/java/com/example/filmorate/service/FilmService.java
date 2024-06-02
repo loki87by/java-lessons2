@@ -1,6 +1,5 @@
 package com.example.filmorate.service;
 
-import com.example.filmorate.model.Feedback;
 import com.example.filmorate.model.Film;
 import com.example.filmorate.storage.FilmStorage;
 
@@ -11,13 +10,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
-import java.sql.PreparedStatement;
-import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 
-@SuppressWarnings("DataFlowIssue")
 @Service
 public class FilmService {
 
@@ -74,35 +68,5 @@ public class FilmService {
                         "SELECT film_id FROM likes GROUP BY film_id HAVING COUNT(DISTINCT user_id) > 0)" +
                         "ORDER BY (SELECT COUNT(DISTINCT user_id) FROM likes WHERE film_id = films.id) DESC LIMIT ?;";
         return jdbcTemplate.query(sqlQuery, (rs, _) -> filmStorage.makeFilms(rs), length);
-    }
-
-    public Optional<Feedback> comment(int filmId, int userId, String content, int rate) {
-        Timestamp feedbackDate = Timestamp.from(Instant.now());
-        String sql = "INSERT INTO feedbacks (content, feedback_date, film_id, author_id, rate) VALUES (?, ?, ?, ?, ?)";
-
-        System.out.println(STR."sql: \{sql}");
-        System.out.println(STR."filmId: \{filmId}");
-        System.out.println(STR."userId: \{userId}");
-        System.out.println(STR."rate: \{rate}");
-        System.out.println(STR."content: \{content}");
-        int rowsAffected = jdbcTemplate.update(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setString(1, content);
-            preparedStatement.setTimestamp(2, feedbackDate);
-            preparedStatement.setInt(3, filmId);
-            preparedStatement.setInt(4, userId);
-            preparedStatement.setInt(5, rate);
-            return preparedStatement;
-        });
-
-        if (rowsAffected > 0) {
-            String sqlQuery = "SELECT max(id) as id from feedbacks;";
-            Integer id = jdbcTemplate.queryForObject(sqlQuery, Integer.class);
-            if (id != null) {
-                Feedback feedback = new Feedback(id, content, rate, filmId, userId, feedbackDate);
-                return Optional.of(feedback);
-            }
-        }
-        return Optional.empty();
     }
 }

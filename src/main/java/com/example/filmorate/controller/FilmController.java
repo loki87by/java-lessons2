@@ -3,11 +3,13 @@ package com.example.filmorate.controller;
 import com.example.filmorate.model.Feedback;
 import com.example.filmorate.model.Film;
 import com.example.filmorate.model.TypeIdEntity;
+import com.example.filmorate.service.FeedbackService;
 import com.example.filmorate.service.FilmService;
 import com.example.filmorate.storage.FilmStorage;
 
 import jakarta.validation.NoProviderFoundException;
 import jakarta.validation.ValidationException;
+
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,11 +24,13 @@ import java.util.Optional;
 public class FilmController {
     private final FilmStorage filmStorage;
     private final FilmService filmService;
+    private final FeedbackService feedbackService;
 
     @Autowired
-    public FilmController(@Qualifier("filmDBStorage") FilmStorage filmStorage, FilmService filmService) {
+    public FilmController(@Qualifier("filmDBStorage") FilmStorage filmStorage, FilmService filmService, FeedbackService feedbackService) {
         this.filmStorage = filmStorage;
         this.filmService = filmService;
+        this.feedbackService = feedbackService;
     }
 
     @GetMapping("/films")
@@ -87,6 +91,16 @@ public class FilmController {
         return filmStorage.getMpaById(id);
     }
 
+    @GetMapping("/comments")
+    public List<Feedback> getAllComments() {
+        return feedbackService.getAllComments();
+    }
+
+    @GetMapping("/films/{id}/comments")
+    public List<Feedback> getComments(@PathVariable Integer id) {
+        return feedbackService.getComments(id);
+    }
+
     @PostMapping("/films/{id}/comment/{userId}")
     public Optional<Feedback> setComment(@PathVariable Integer id,
                                          @PathVariable Integer userId,
@@ -95,6 +109,6 @@ public class FilmController {
         if (rate < 0 || rate > 10) {
             throw new ValidationException("Оценка может быть от 1 до 10 или 0 если без оценки.");
         }
-        return filmService.comment(id, userId, content, rate);
+        return feedbackService.setComment(id, userId, content, rate);
     }
 }
