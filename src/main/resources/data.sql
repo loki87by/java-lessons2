@@ -20,13 +20,13 @@ insert into PUBLIC.genres (type) select 'Документальный'
 where not exists (select 1 from PUBLIC.genres where type = 'Документальный');
 insert into PUBLIC.genres (type) select 'Боевик'
 where not exists (select 1 from PUBLIC.genres where type = 'Боевик');
-insert into PUBLIC.feed_realtions (content) select 'На портал добавлен фильм: '
+insert into PUBLIC.feed_realtions (content, entity_type) select 'На портал добавлен фильм: ', ''
 where not exists (select 1 from PUBLIC.feed_realtions where content = 'На портал добавлен фильм: ');
-insert into PUBLIC.feed_realtions (content) select 'К нам присоединился пользователь: '
+insert into PUBLIC.feed_realtions (content, entity_type) select 'К нам присоединился пользователь: ', ''
 where not exists (select 1 from PUBLIC.feed_realtions where content = 'К нам присоединился пользователь: ');
-insert into PUBLIC.feed_realtions (content) select 'С портала удален фильм: '
+insert into PUBLIC.feed_realtions (content, entity_type) select 'С портала удален фильм: ', ''
 where not exists (select 1 from PUBLIC.feed_realtions where content = 'С портала удален фильм: ');
-insert into PUBLIC.feed_realtions (content) select 'Нас покинул пользователь: '
+insert into PUBLIC.feed_realtions (content, entity_type) select 'Нас покинул пользователь: ', ''
 where not exists (select 1 from PUBLIC.feed_realtions where content = 'Нас покинул пользователь: ');
 insert into PUBLIC.feed_realtions (content, entity_type) select ' подписался на пользователя: ', 'Пользователь: '
 where not exists (select 1 from PUBLIC.feed_realtions where content = ' подписался на пользователя: ');
@@ -67,8 +67,4 @@ select * from mpa_rating;
 select * from genres
 update mpa_rating set id = 1 where type = 'G';
 */
-/*create table MPA_RATING
-(
-    "'G'" int
-);*/
 

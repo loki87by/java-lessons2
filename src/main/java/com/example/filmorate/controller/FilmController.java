@@ -1,11 +1,13 @@
 package com.example.filmorate.controller;
 
+import com.example.filmorate.model.Feedback;
 import com.example.filmorate.model.Film;
 import com.example.filmorate.model.TypeIdEntity;
 import com.example.filmorate.service.FilmService;
 import com.example.filmorate.storage.FilmStorage;
 
 import jakarta.validation.NoProviderFoundException;
+import jakarta.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +44,7 @@ public class FilmController {
     @PutMapping(value = "/films")
     public Film update(@RequestBody Film film) {
 
-        if(film.getId() > 0) {
+        if (film.getId() > 0) {
             return filmStorage.update(film);
         } else {
             throw new NoProviderFoundException("'id' обязательное поле");
@@ -83,5 +85,16 @@ public class FilmController {
     @GetMapping("/mpa/{id}")
     public TypeIdEntity getRatings(@PathVariable Integer id) {
         return filmStorage.getMpaById(id);
+    }
+
+    @PostMapping("/films/{id}/comment/{userId}")
+    public Optional<Feedback> setComment(@PathVariable Integer id,
+                                         @PathVariable Integer userId,
+                                         @RequestParam(required = false, defaultValue = "0") int rate,
+                                         @RequestParam String content) {
+        if (rate < 0 || rate > 10) {
+            throw new ValidationException("Оценка может быть от 1 до 10 или 0 если без оценки.");
+        }
+        return filmService.comment(id, userId, content, rate);
     }
 }
