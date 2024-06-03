@@ -27,19 +27,23 @@ public class UserService {
 
     private String getSqlByRelationship(int stateId, boolean isFromUser) {
         String column = isFromUser ? "from_user" : "to_user";
-        return "SELECT " + column + " AS id FROM friendship WHERE " +
-                (isFromUser ? "to_user = ?" : "from_user = ?") + " AND stateId = " + stateId;
+        return STR."SELECT \{
+                column} AS id FROM friendship WHERE \{
+                isFromUser ? "to_user = ?" : "from_user = ?"} AND stateId = \{
+                stateId}";
     }
 
     public List<User> findUsersByFriendshipState(int userId, boolean isFromUser) {
-        String sql = "SELECT * FROM users WHERE id IN (" + getSqlByRelationship(0, isFromUser) + ")";
-        return jdbcTemplate.query(sql, (rs, rowNum) -> userStorage.makeUsers(rs), userId);
+        String sql = STR."SELECT * FROM users WHERE id IN (\{getSqlByRelationship(0, isFromUser)})";
+        return jdbcTemplate.query(sql, (rs, _) -> userStorage.makeUsers(rs), userId);
     }
 
     public List<User> findFriendsById(int id) {
-        String sql = "SELECT * FROM users where id in (" + getSqlByRelationship(1, true) +
-                " union " + getSqlByRelationship(1, false) + ")";
-        return jdbcTemplate.query(sql, (rs, rowNum) -> userStorage.makeUsers(rs), id, id);
+        String sql =
+                STR."SELECT * FROM users where id in (\{
+                        getSqlByRelationship(1, true)} union \{
+                        getSqlByRelationship(1, false)})";
+        return jdbcTemplate.query(sql, (rs, _) -> userStorage.makeUsers(rs), id, id);
     }
 
     private boolean[] compareFriendsState(int firstId, int secondId) {
@@ -64,17 +68,17 @@ public class UserService {
             int rowsAffected = jdbcTemplate.update(sql, firstId, secondId);
 
             if (rowsAffected > 0) {
-                return "Теперь пользователь `id=" + firstId + "' подписан на пользователя `id=" + secondId + "'.";
+                return STR."Теперь пользователь `id=\{firstId}' подписан на пользователя `id=\{secondId}'.";
             } else {
                 return "Что-то пошло не так.";
             }
         } catch (DataIntegrityViolationException e) {
             if (e.getMessage().toLowerCase().contains("key(to_user)")) {
-                System.out.println("to error user = " + secondId);
-                throw new NoProviderFoundException("Пользователь с `id=" + secondId + "` не найден.");
+                //System.out.println("to error user = " + secondId);
+                throw new NoProviderFoundException(STR."Пользователь с `id=\{secondId}` не найден.");
             } else if (e.getMessage().toLowerCase().contains("key(from_user)")) {
-                System.out.println("from error user = " + firstId);
-                throw new NoProviderFoundException("Пользователь с `id=" + firstId + "` не найден.");
+                //System.out.println(STR."from error user = \{firstId}");
+                throw new NoProviderFoundException(STR."Пользователь с `id=\{firstId}` не найден.");
             } else {
                 throw new NoProviderFoundException(e.getMessage().replace("; ", "\n"));
             }
@@ -89,12 +93,12 @@ public class UserService {
             int rowsAffected = jdbcTemplate.update(sqlQuery, followerId, userId);
 
             if (rowsAffected > 0) {
-                return "Пользователь `id=" + userId + "' принял запрос дружбы от пользователя `id=" + followerId + "'.";
+                return STR."Пользователь `id=\{userId}' принял запрос дружбы от пользователя `id=\{followerId}'.";
             } else {
                 return "Что-то пошло не так.";
             }
         } else {
-            return "Нельзя добавить в друзья пользователя `id=" + followerId + "', пока он не подписан на вас.";
+            return STR."Нельзя добавить в друзья пользователя `id=\{followerId}', пока он не подписан на вас.";
         }
     }
 
@@ -109,7 +113,7 @@ public class UserService {
             boolean follower = jdbcTemplate.queryForObject(sql, Integer.class, removedId, userId) == 1;
 
             if (rowsAffected > 0 && !follower) {
-                return "Пользователь `id=" + userId + "' разорвал дружбу с пользователем `id=" + removedId + "'.";
+                return STR."Пользователь `id=\{userId}' разорвал дружбу с пользователем `id=\{removedId}'.";
             }
         } else if (fromUser && !toUser) {
             String sql = "select count(*) from friendship where from_user = ? and to_user = ? AND stateId = 1";
@@ -121,7 +125,7 @@ public class UserService {
                 int rowsAffected = jdbcTemplate.update(sqlQuery, userId, removedId);
 
                 if (rowsAffected > 0) {
-                    return "Дружба разорвана. " + follow(removedId, userId);
+                    return STR."Дружба разорвана. \{follow(removedId, userId)}";
                 }
             }
         }
@@ -129,12 +133,12 @@ public class UserService {
     }
 
     public List<User> getCrossFriends(int firstId, int secondId) {
-        String sql = "SELECT * FROM users where id in (SELECT id from (SELECT id FROM (SELECT * FROM (" +
-                getSqlByRelationship(1, true) +
-                " union " + getSqlByRelationship(1, false) + ")" +
-                ") AS user1 union all SELECT id FROM (SELECT * FROM (" + getSqlByRelationship(1, true) +
-                " union " + getSqlByRelationship(1, false) +
-                ")) AS user2 ) AS all_ids GROUP BY id HAVING COUNT(id) > 1);"
+        String sql =
+                STR."SELECT * FROM users where id in (SELECT id from (SELECT id FROM (SELECT * FROM (\{
+                getSqlByRelationship(1, true)} union \{
+                getSqlByRelationship(1, false)})) AS user1 union all SELECT id FROM (SELECT * FROM (\{
+                getSqlByRelationship(1, true)} union \{
+                getSqlByRelationship(1, false)})) AS user2 ) AS all_ids GROUP BY id HAVING COUNT(id) > 1);"
                 ;
         return jdbcTemplate.query(sql, (rs, rowNum) -> userStorage.makeUsers(rs), firstId, firstId, secondId, secondId);
     }

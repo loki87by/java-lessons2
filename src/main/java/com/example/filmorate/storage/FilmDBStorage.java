@@ -198,7 +198,8 @@ public class FilmDBStorage implements FilmStorage {
 
         if (film.getDescription() != null && film.getDescription().length() > 200) {
             errorMessage =
-                    STR."Длина описания не может превышать 200 символов, а переданный текст содержит \{film.getDescription().length()} символа(ов).";
+                    STR."Длина описания не может превышать 200 символов, а переданный текст содержит \{
+                            film.getDescription().length()} символа(ов).";
             throw new ValidationException(errorMessage);
         }
 

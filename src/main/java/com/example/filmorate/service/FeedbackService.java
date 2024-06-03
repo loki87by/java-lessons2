@@ -68,34 +68,24 @@ public class FeedbackService {
         return Optional.empty();
     }
 
+    public void idChecker(String table, int id, String entity) {
+        String checkIdSql = STR."select count(*) from \{table} where id = ?";
+        Integer idCounter = jdbcTemplate.queryForObject(checkIdSql, Integer.class, id);
+
+        if (idCounter != 1) {
+            String errorMessage = STR."Не найден\{entity} с id=\{id}";
+            throw new NoProviderFoundException(errorMessage);
+        }
+    }
+
     public Optional<Feedback> changeComment(Feedback feedback) {
         int id = feedback.getId();
         String errorMessage;
         Timestamp feedbackDate = Timestamp.from(Instant.now());
 
-        String checkIdSql = "select count(*) from feedbacks where id = ?";
-        Integer idCounter = jdbcTemplate.queryForObject(checkIdSql, Integer.class, id);
-
-        if (idCounter != 1) {
-            errorMessage = STR."Не найден отзыв с id=\{id}";
-            throw new NoProviderFoundException(errorMessage);
-        }
-
-        String checkFilmIdSql = "select count(*) from films where id = ?";
-        Integer filmIdCounter = jdbcTemplate.queryForObject(checkFilmIdSql, Integer.class, feedback.getFilmId());
-
-        if (filmIdCounter != 1 && feedback.getFilmId() != 0) {
-            errorMessage = STR."Не найден фильм с id=\{feedback.getFilmId()}";
-            throw new NoProviderFoundException(errorMessage);
-        }
-
-        String checkUserIdSql = "select count(*) from users where id = ?";
-        Integer userIdCounter = jdbcTemplate.queryForObject(checkUserIdSql, Integer.class, feedback.getAuthor());
-
-        if (userIdCounter != 1 && feedback.getAuthor() != 0) {
-            errorMessage = STR."Не найден пользователь с id=\{feedback.getAuthor()}";
-            throw new NoProviderFoundException(errorMessage);
-        }
+        idChecker("feedbacks", id, " отзыв");
+        idChecker("films", feedback.getFilmId(), " фильм");
+        idChecker("users", feedback.getAuthor(), " пользователь");
 
         if (feedback.getRate() == 0 && feedback.getContent().isEmpty()) {
             errorMessage = "Отзыв должен содержить комментарий и/или оценку.";
