@@ -2,7 +2,6 @@ package com.example.filmorate.controller;
 
 import com.example.filmorate.model.Film;
 import com.example.filmorate.model.TypeIdEntity;
-import com.example.filmorate.service.FeedbackService;
 import com.example.filmorate.service.FilmService;
 import com.example.filmorate.storage.FilmStorage;
 
@@ -86,4 +85,8 @@ public class FilmController {
         return filmStorage.getMpaById(id);
     }
 
+    @GetMapping("/films/{userId}/common_films/{friendId}")
+    public List<Film> getCommonFilms(@PathVariable Integer userId, @PathVariable Integer friendId) {
+        return filmService.getCrossFilms(userId, friendId);
+    }
 }

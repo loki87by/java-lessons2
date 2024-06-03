@@ -69,4 +69,13 @@ public class FilmService {
                         "ORDER BY (SELECT COUNT(DISTINCT user_id) FROM likes WHERE film_id = films.id) DESC LIMIT ?;";
         return jdbcTemplate.query(sqlQuery, (rs, _) -> filmStorage.makeFilms(rs), length);
     }
+
+    public List<Film> getCrossFilms(int userId, int friendId) {
+        String sql = "select * from films where id in (" +
+                "select film_id from (" +
+                "select film_id, count(id) from likes where user_id=? or user_id=?" +
+                "group by film_id having count(id) = 2)" +
+                "where id is not null);";
+        return jdbcTemplate.query(sql, (rs, _) -> filmStorage.makeFilms(rs), userId, friendId);
+    }
 }

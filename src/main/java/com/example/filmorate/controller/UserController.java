@@ -92,11 +92,6 @@ public class UserController {
 
     @GetMapping("/users/{id}/friends/common/{friendId}")
     public List<User> getCommonFriends(@PathVariable Integer id, @PathVariable Integer friendId) {
-        return userService.getCrossFriends(id, friendId);/*
-        Set<User> friends = new HashSet<>();
-        for (int curId : crossFriendsIds) {
-            friends.add(userStorage.findAll().get(curId));
-        }
-        return friends;*/
+        return userService.getCrossFriends(id, friendId);
     }
 }
