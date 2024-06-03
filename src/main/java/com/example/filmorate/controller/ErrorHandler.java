@@ -12,7 +12,9 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.yaml.snakeyaml.error.MissingEnvironmentVariableException;
 
+import java.rmi.ServerException;
 import java.util.List;
 
 @RestControllerAdvice
@@ -30,9 +32,21 @@ public class ErrorHandler {
         return new ErrorResponse("error: ", e.getMessage()).getMessage();
     }
 
+    @ExceptionHandler(MissingEnvironmentVariableException .class)
+    @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
+    public static String hasNotDataException(final MissingEnvironmentVariableException  e) {
+        return new ErrorResponse("error: ", e.getMessage()).getMessage();
+    }
+
     @ExceptionHandler(NoProviderFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public static String notFoundException(final NoProviderFoundException e) {
+        return new ErrorResponse("error: ", e.getMessage()).getMessage();
+    }
+
+    @ExceptionHandler(ServerException.class)
+    @ResponseStatus(HttpStatus.I_AM_A_TEAPOT)
+    public static String unsupportedServerException(final ServerException e) {
         return new ErrorResponse("error: ", e.getMessage()).getMessage();
     }
 

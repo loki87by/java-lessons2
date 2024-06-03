@@ -19,6 +19,3 @@ public class ErrorResponse extends Throwable {
         return this.error + this.description;
     }
 }
-
-
-
