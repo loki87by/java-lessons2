@@ -1,9 +1,9 @@
 package com.example.filmorate.controller;
 
+import com.example.filmorate.dao.FriendshipDao;
+import com.example.filmorate.dao.UserDao;
 import com.example.filmorate.model.ErrorResponse;
 import com.example.filmorate.model.User;
-import com.example.filmorate.service.UserService;
-import com.example.filmorate.storage.UserStorage;
 
 import jakarta.validation.NoProviderFoundException;
 import jakarta.validation.Valid;
@@ -11,7 +11,6 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,79 +18,77 @@ import java.util.*;
 
 @RestController
 @Slf4j
+@RequestMapping("/users")
 public class UserController {
-    private final UserStorage userStorage;
-    private final UserService userService;
+    private final UserDao userDao;
+    private final FriendshipDao friendshipDao;
 
     @Autowired
-    public UserController(@Qualifier("userDBStorage") UserStorage userStorage, UserService userService) {
-        this.userStorage = userStorage;
-        this.userService = userService;
+    public UserController( UserDao userDao, FriendshipDao friendshipDao) {
+        this.userDao = userDao;
+        this.friendshipDao = friendshipDao;
     }
 
-    @GetMapping("/users")
+    @GetMapping("")
     public List<User> findAll() {
-        return userStorage.findAll();
+        return userDao.findAll();
     }
 
-    @PostMapping(value = "/users")
+    @PostMapping(value = "")
     public User create(@Valid @RequestBody User user) {
-        Optional<User> newUser = userStorage.create(user);
+        Optional<User> newUser = userDao.create(user);
         return newUser.orElseThrow(() -> new NoProviderFoundException("User not found"));
     }
 
-    @PutMapping(value = "/users")
+    @PutMapping(value = "")
     @ResponseStatus(HttpStatus.CREATED)
     public User update(@Valid @RequestBody User user) throws ErrorResponse {
 
         if(user.getId() > 0) {
-            return userStorage.update(user);
+            return userDao.update(user);
         } else {
             throw new NoProviderFoundException("'id' обязательное поле");
         }
     }
 
-    @GetMapping("/users/{id}")
+    @GetMapping("/{id}")
     public User findById(@RequestBody @PathVariable Integer id) {
-        Optional<User> current = userStorage.findById(id);
+        Optional<User> current = userDao.findById(id);
         return current.orElseThrow(() -> new NoProviderFoundException("User not found"));
-        //return userStorage.findById(id);
-        /*return users.stream().filter(u -> u.getId() == id).findFirst().orElseThrow(() ->
-                new NoProviderFoundException("User not found"));*/
     }
 
-    @PostMapping(value = "/users/{id}/follow/{friendId}")
+    @PostMapping(value = "/{id}/follow/{friendId}")
     public String follow(@PathVariable int id, @PathVariable int friendId) {
-        return userService.follow(id, friendId);
+        return friendshipDao.follow(id, friendId);
     }
 
-    @GetMapping("/users/{id}/followers")
+    @GetMapping("/{id}/followers")
     public List<User> findFollowersById(@RequestBody @PathVariable Integer id) {
-        return userService.findUsersByFriendshipState(id, true);
+        return friendshipDao.findUsersByFriendshipState(id, true);
     }
 
-    @GetMapping("/users/{id}/follows")
+    @GetMapping("/{id}/follows")
     public List<User> findFollowsById(@RequestBody @PathVariable Integer id) {
-        return userService.findUsersByFriendshipState(id, false);
+        return friendshipDao.findUsersByFriendshipState(id, false);
     }
 
-    @GetMapping("/users/{id}/friends")
+    @GetMapping("/{id}/friends")
     public List<User> findFriendsById(@RequestBody @PathVariable Integer id) {
-        return userService.findFriendsById(id);
+        return friendshipDao.findFriendsById(id);
     }
 
-    @PutMapping("/users/{id}/friends/{friendId}")
+    @PutMapping("/{id}/friends/{friendId}")
     public String addFriend(@PathVariable int id, @PathVariable int friendId) {
-        return userService.addFriend(id, friendId);
+        return friendshipDao.addFriend(id, friendId);
     }
 
-    @DeleteMapping("/users/{id}/friends/{friendId}")
+    @DeleteMapping("/{id}/friends/{friendId}")
     public String removeFriend(@PathVariable Integer id, @PathVariable Integer friendId) {
-        return userService.removeFriend(id, friendId);
+        return friendshipDao.removeFriend(id, friendId);
     }
 
-    @GetMapping("/users/{id}/friends/common/{friendId}")
+    @GetMapping("/{id}/friends/common/{friendId}")
     public List<User> getCommonFriends(@PathVariable Integer id, @PathVariable Integer friendId) {
-        return userService.getCrossFriends(id, friendId);
+        return friendshipDao.getCrossFriends(id, friendId);
     }
 }
