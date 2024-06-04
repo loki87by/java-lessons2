@@ -1,16 +1,13 @@
 package com.example.filmorate.controller;
 
+import com.example.filmorate.dao.FilmDao;
 import com.example.filmorate.model.Film;
-import com.example.filmorate.model.TypeIdEntity;
-import com.example.filmorate.service.FilmService;
-import com.example.filmorate.storage.FilmStorage;
 
 import jakarta.validation.NoProviderFoundException;
 
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,75 +15,59 @@ import java.util.Optional;
 
 @RestController
 @Slf4j
+@RequestMapping("/films")
 public class FilmController {
-    private final FilmStorage filmStorage;
-    private final FilmService filmService;
+    private final FilmDao filmDao;
 
     @Autowired
-    public FilmController(@Qualifier("filmDBStorage") FilmStorage filmStorage, FilmService filmService) {
-        this.filmStorage = filmStorage;
-        this.filmService = filmService;
+    public FilmController(FilmDao filmDao) {
+        this.filmDao = filmDao;
     }
 
-    @GetMapping("/films")
+    @GetMapping("")
     public List<Film> findAll() {
-        return filmStorage.findAll();
+        return filmDao.findAll();
     }
 
-    @PostMapping(value = "/films")
+
+    @GetMapping("/{id}")
+    public Film findCurrent(@PathVariable Integer id) {
+        return filmDao.findCurrent(id);
+    }
+    @PostMapping(value = "")
     public Film create(@RequestBody Film film) {
-        Optional<Film> newFilm = filmStorage.create(film);
+        Optional<Film> newFilm = filmDao.create(film);
         return newFilm.orElseThrow(() -> new NoProviderFoundException("Film not found"));
     }
 
-    @PutMapping(value = "/films")
+    @PutMapping(value = "")
     public Film update(@RequestBody Film film) {
 
         if (film.getId() > 0) {
-            return filmStorage.update(film);
+            return filmDao.update(film);
         } else {
             throw new NoProviderFoundException("'id' обязательное поле");
         }
     }
 
-    @PutMapping("/films/{id}/like/{userId}")
+    @PutMapping("/{id}/like/{userId}")
     public String like(@PathVariable Integer id, @PathVariable Integer userId) {
-        return filmService.like(id, userId);
+        return filmDao.like(id, userId);
     }
 
-    @DeleteMapping("/films/{id}/like/{userId}")
+    @DeleteMapping("/{id}/like/{userId}")
     public String dislike(@PathVariable Integer id, @PathVariable Integer userId) {
-        return filmService.dislike(id, userId);
+        return filmDao.dislike(id, userId);
     }
 
-    @GetMapping("/films/popular")
+    @GetMapping("/popular")
     public List<Film> getMostPopular(
             @RequestParam(required = false, defaultValue = "10") Integer count) {
-        return filmService.getMostPopular(count);
+        return filmDao.getMostPopular(count);
     }
 
-    @GetMapping("/genres")
-    public List<TypeIdEntity> getGenres() {
-        return filmStorage.getAllGenres();
-    }
-
-    @GetMapping("/genres/{id}")
-    public TypeIdEntity getGenres(@PathVariable Integer id) {
-        return filmStorage.getGenreById(id);
-    }
-
-    @GetMapping("/mpa")
-    public List<TypeIdEntity> getRatings() {
-        return filmStorage.getAllMpa();
-    }
-
-    @GetMapping("/mpa/{id}")
-    public TypeIdEntity getRatings(@PathVariable Integer id) {
-        return filmStorage.getMpaById(id);
-    }
-
-    @GetMapping("/films/{userId}/common_films/{friendId}")
+    @GetMapping("/{userId}/common_films/{friendId}")
     public List<Film> getCommonFilms(@PathVariable Integer userId, @PathVariable Integer friendId) {
-        return filmService.getCrossFilms(userId, friendId);
+        return filmDao.getCrossFilms(userId, friendId);
     }
 }
