@@ -1,7 +1,7 @@
 package com.example.filmorate.controller;
 
+import com.example.filmorate.dao.RecommendationDao;
 import com.example.filmorate.model.Film;
-import com.example.filmorate.service.RecommendationService;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -14,35 +14,36 @@ import java.util.List;
 
 @RestController
 @Slf4j
+@RequestMapping("/recommendations")
 public class RecommendationController {
-    private final RecommendationService recommendationService;
+    private final RecommendationDao recommendationDao;
 
     @Autowired
-    public RecommendationController(RecommendationService recommendationService) {
-        this.recommendationService = recommendationService;
+    public RecommendationController(RecommendationDao recommendationDao) {
+        this.recommendationDao = recommendationDao;
     }
 
-    @GetMapping("/recommendations/{userId}")
+    @GetMapping("/{userId}")
     public List<Film> getRecommendations(@PathVariable int userId) {
-        return recommendationService.getRecommendations(userId);
+        return recommendationDao.getRecommendations(userId);
     }
 
-    @PostMapping("/recommendations/{userId}/{filmId}/{authorId}")
+    @PostMapping("/{userId}/{filmId}/{authorId}")
     public String recommendToFriend(@PathVariable int userId,
                                     @PathVariable int filmId,
                                     @PathVariable int authorId) throws ServerException {
-        int recId = recommendationService.recommendToFriend(userId, filmId, authorId);
+        int recId = recommendationDao.recommendToFriend(userId, filmId, authorId);
         return recId < 0 ? "Такая рекомендация уже есть." : STR."Добавлена рекомендация с id=\{recId}";
     }
 
-    @PostMapping("/recommendations/{authorId}/{filmId}/All")
+    @PostMapping("/{authorId}/{filmId}/All")
     public String recommendToAll(@PathVariable int authorId,
                                  @PathVariable int filmId) {
-        return recommendationService.recommendToAll(authorId, filmId);
+        return recommendationDao.recommendToAll(authorId, filmId);
     }
 
-    @DeleteMapping("/recommendations/{authorId}/{recId}")
+    @DeleteMapping("/{authorId}/{recId}")
     public String deleteRecommendations(@PathVariable int authorId, @PathVariable int recId) throws ServerException {
-        return recommendationService.deleteRecommendations(authorId, recId);
+        return recommendationDao.deleteRecommendations(authorId, recId);
     }
 }

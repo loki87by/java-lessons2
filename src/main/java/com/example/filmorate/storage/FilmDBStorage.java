@@ -53,7 +53,7 @@ public class FilmDBStorage {
 
         for (String key : filmParams.keySet()) {
 
-            if (filmParams.get(key) != null) {
+            if (filmParams.get(key) != null && !filmParams.get(key).equals("null")) {
                 notNullParamsList.add(STR."\{key} = ?");
                 paramValues.add(filmParams.get(key));
             }
@@ -107,4 +107,10 @@ public class FilmDBStorage {
         }
     }
 
+    public List<Film> searchFilms(String finded) {
+        String resSql =
+                "select * from films where lower(name) like lower(concat('%', ?, '%')) " +
+                        "or lower(description) like lower(concat('%', ?, '%'));";
+        return jdbcTemplate.query(resSql, (rs, _) -> makeFilms(rs), finded, finded);
+    }
 }

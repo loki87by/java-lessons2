@@ -70,7 +70,7 @@ public class FeedbackService {
 
     public void idChecker(String table, int id, String entity) {
         String checkIdSql = STR."select count(*) from \{table} where id = ?";
-        Integer idCounter = jdbcTemplate.queryForObject(checkIdSql, Integer.class, id);
+        Integer idCounter = Objects.requireNonNull(jdbcTemplate.queryForObject(checkIdSql, Integer.class, id));
 
         if (idCounter != 1) {
             String errorMessage = STR."Не найден\{entity} с id=\{id}";
@@ -153,7 +153,7 @@ public class FeedbackService {
             id = cur;
         } else {
             String getIdSql = "select id from feedbacks where film_id = ? and author_id = ?;";
-            id = jdbcTemplate.queryForObject(getIdSql, Integer.class, filmId, userId);
+            id = Objects.requireNonNull(jdbcTemplate.queryForObject(getIdSql, Integer.class, filmId, userId));
         }
         String sql = "update feedbacks set content = ?, feedback_date = ?, film_id = ?, author_id = ?, rate = ? where id = ?";
 
@@ -177,7 +177,7 @@ public class FeedbackService {
 
     public String deleteComment(int id) throws ServerException {
         String idSqlCounter = "select count(*) from feedbacks where id = ?;";
-        Integer count = jdbcTemplate.queryForObject(idSqlCounter, Integer.class, id);
+        Integer count = Objects.requireNonNull(jdbcTemplate.queryForObject(idSqlCounter, Integer.class, id));
 
         if (count != 1) {
             throw new NoProviderFoundException(STR."Не найден отзыв c id=\{id}");
