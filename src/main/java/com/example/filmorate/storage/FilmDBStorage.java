@@ -1,11 +1,13 @@
 package com.example.filmorate.storage;
 
+import com.example.filmorate.dao.FeedDao;
 import com.example.filmorate.model.Film;
 import com.example.filmorate.model.TypeIdEntity;
 
 import jakarta.validation.NoProviderFoundException;
 import jakarta.validation.ValidationException;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -17,9 +19,12 @@ import java.util.*;
 @Component
 public class FilmDBStorage {
     private final JdbcTemplate jdbcTemplate;
+    private static FeedDao feedDao = null;
 
-    public FilmDBStorage(JdbcTemplate jdbcTemplate) {
+    @Autowired
+    public FilmDBStorage(JdbcTemplate jdbcTemplate, FeedDao feedDao) {
         this.jdbcTemplate = jdbcTemplate;
+        FilmDBStorage.feedDao = feedDao;
     }
 
     public Set<Integer> getGenres(int id) {
@@ -47,7 +52,10 @@ public class FilmDBStorage {
         }
     }
 
-    public static int getSqlWithParams(int id, HashMap<String, String> filmParams, String sqlStart, JdbcTemplate jdbcTemplate) {
+    public static int getSqlWithParams(int id, HashMap<String, String> filmParams,
+                                       String sqlStart,
+                                       JdbcTemplate jdbcTemplate,
+                                       String entityName) {
         List<String> notNullParamsList = new ArrayList<>();
         List<Object> paramValues = new ArrayList<>();
 
@@ -58,6 +66,7 @@ public class FilmDBStorage {
                 paramValues.add(filmParams.get(key));
             }
         }
+        feedDao.checkUpdates(entityName, id, notNullParamsList, paramValues);
         String sql = STR."\{sqlStart}\{String.join(", ", notNullParamsList)} WHERE id = ?";
         paramValues.add(id);
         return jdbcTemplate.update(sql, paramValues.toArray());
@@ -81,6 +90,13 @@ public class FilmDBStorage {
     }
 
     public Set<Integer> genreChecker(Set<Integer> genre, int id) {
+        String getOldGenreSql = "select distinct(genre_id) from film_genres where film_id = ?;";
+        Set<Integer> oldValuesSet = new HashSet<>(jdbcTemplate.queryForList(getOldGenreSql, Integer.class, id));
+        boolean isEqual = oldValuesSet.equals(genre);
+
+        if (!isEqual) {
+            feedDao.addToFeed(11, id, oldValuesSet.toString(), genre.toString());
+        }
         String oldGenreSql = "delete from film_genres where film_id = ?;";
         jdbcTemplate.update(oldGenreSql, id);
         for (int genreId : genre) {

@@ -12,4 +12,5 @@ public interface UserDao {
     Optional<User> findById (Integer id);
     Optional<User> create(User user);
     User update(User user);
+    String removeUser(int id);
 }

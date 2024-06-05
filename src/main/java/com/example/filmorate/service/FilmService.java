@@ -18,7 +18,7 @@ public class FilmService {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public void checkFilmAndUser(int filmId, int userId) {
+    public void checkFilm(int filmId) {
         String checkFilmSql = "select count(*) from films where id = ?;";
         Integer filmCounter = Objects.requireNonNull(jdbcTemplate.queryForObject(checkFilmSql, Integer.class, filmId));
 
@@ -26,6 +26,9 @@ public class FilmService {
             String error = STR."Фильм с id=\{filmId} не найден.";
             throw new NoProviderFoundException(error);
         }
+    }
+
+    public void checkUser(int userId) {
         String checkUserSql = "select count(*) from users where id = ?;";
         Integer userCounter = Objects.requireNonNull(jdbcTemplate.queryForObject(checkUserSql, Integer.class, userId));
 
@@ -33,5 +36,10 @@ public class FilmService {
             String error = STR."Пользователь с id=\{userId} не найден.";
             throw new NoProviderFoundException(error);
         }
+    }
+
+    public void checkFilmAndUser(int filmId, int userId) {
+        checkFilm(filmId);
+        checkUser(userId);
     }
 }

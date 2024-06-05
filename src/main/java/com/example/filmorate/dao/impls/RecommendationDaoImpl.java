@@ -1,5 +1,6 @@
 package com.example.filmorate.dao.impls;
 
+import com.example.filmorate.dao.FeedDao;
 import com.example.filmorate.dao.RecommendationDao;
 import com.example.filmorate.model.Film;
 import com.example.filmorate.service.FeedbackService;
@@ -22,13 +23,16 @@ public class RecommendationDaoImpl implements RecommendationDao {
     private final JdbcTemplate jdbcTemplate;
     private final FeedbackService feedbackService;
     private final FilmDBStorage filmDbStorage;
+    private final FeedDao feedDao;
 
     @Autowired
     public RecommendationDaoImpl(JdbcTemplate jdbcTemplate,
                                  FilmDBStorage filmDbStorage,
+                                 FeedDao feedDao,
                                  FeedbackService feedbackService) {
         this.jdbcTemplate = jdbcTemplate;
         this.feedbackService = feedbackService;
+        this.feedDao = feedDao;
         this.filmDbStorage = filmDbStorage;
     }
 
@@ -67,6 +71,7 @@ public class RecommendationDaoImpl implements RecommendationDao {
         if (rowsAffected > 0) {
             String sqlQuery = "SELECT max(id) as id from recommendations;";
             Integer id = jdbcTemplate.queryForObject(sqlQuery, Integer.class);
+            feedDao.addToFeed(20, authorId, filmId, String.valueOf(userId));
 
             if (id != null) {
                 return id;
@@ -100,9 +105,12 @@ public class RecommendationDaoImpl implements RecommendationDao {
         feedbackService.idChecker("users", authorId, " пользователь");
         feedbackService.idChecker("recommendations", recId, "а рекомендация");
         String checkOwnerSql = "select count(*) from recommendations where author_id = ? and id = ?;";
-        Integer recCounter = Objects.requireNonNull(jdbcTemplate.queryForObject(checkOwnerSql, Integer.class, authorId, recId));
+        Integer recCounter = jdbcTemplate.queryForObject(checkOwnerSql, Integer.class, authorId, recId);
 
-        if (recCounter > 0) {
+        if (recCounter != null && recCounter > 0) {
+            String getFilmIdSql = "select film_id from recommendations where author_id = ? and id = ?;";
+            Integer filmId = Objects.requireNonNull(jdbcTemplate.queryForObject(getFilmIdSql, Integer.class, authorId, recId));
+            feedDao.addToFeed(25, authorId, filmId);
             String sql = "delete from recommendations where author_id = ? and id = ?;";
             int rowsAffected = jdbcTemplate.update(sql, authorId, recId);
             if (rowsAffected > 0) {

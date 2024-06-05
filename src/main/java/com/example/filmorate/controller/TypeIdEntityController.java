@@ -2,7 +2,9 @@ package com.example.filmorate.controller;
 
 import com.example.filmorate.dao.FilmDao;
 import com.example.filmorate.model.TypeIdEntity;
+
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.GetMapping;

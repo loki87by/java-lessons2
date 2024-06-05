@@ -1,5 +1,6 @@
 package com.example.filmorate.dao.impls;
 
+import com.example.filmorate.dao.FeedDao;
 import com.example.filmorate.dao.FilmDao;
 import com.example.filmorate.model.Film;
 import com.example.filmorate.model.TypeIdEntity;
@@ -23,14 +24,17 @@ public class FilmDaoImpl implements FilmDao {
     private final JdbcTemplate jdbcTemplate;
     private final FilmDBStorage filmDBStorage;
     private final FilmService filmService;
+    private final FeedDao feedDao;
     String minDate = "1895-12-28T00:00:00Z";
 
     @Autowired
-    public FilmDaoImpl(JdbcTemplate jdbcTemplate, FilmService filmService, FilmDBStorage filmDBStorage) {
+    public FilmDaoImpl(JdbcTemplate jdbcTemplate, FilmService filmService, FilmDBStorage filmDBStorage, FeedDao feedDao) {
         this.jdbcTemplate = jdbcTemplate;
         this.filmService = filmService;
         this.filmDBStorage = filmDBStorage;
+        this.feedDao = feedDao;
     }
+
     @Override
     public List<TypeIdEntity> getAllGenres() {
         return filmDBStorage.getAllTypeIdEntity("genres");
@@ -44,7 +48,7 @@ public class FilmDaoImpl implements FilmDao {
     @Override
     public List<TypeIdEntity> getAllMpa() {
         return filmDBStorage.getAllTypeIdEntity("mpa_rating");
-    }//777
+    }
 
     @Override
     public TypeIdEntity getMpaById(Integer id) {
@@ -108,6 +112,7 @@ public class FilmDaoImpl implements FilmDao {
             Integer id = jdbcTemplate.queryForObject(sqlQuery, Integer.class);
             if (id != null) {
                 film.setId(id);
+                feedDao.addToFeed(1, id);
                 return Optional.of(film);
             }
         }
@@ -149,7 +154,7 @@ public class FilmDaoImpl implements FilmDao {
         filmParams.put("duration", String.valueOf(film.getDuration()));
         filmParams.put("mpa_rating_id", String.valueOf(film.getMpaRating()));
         String sqlStart = "UPDATE films SET ";
-        int rowsAffected = FilmDBStorage.getSqlWithParams(id, filmParams, sqlStart, jdbcTemplate);
+        int rowsAffected = FilmDBStorage.getSqlWithParams(id, filmParams, sqlStart, jdbcTemplate, "films");
 
         if (!film.getGenre().isEmpty()) {
             rowsAffected += filmDBStorage.genreChecker(film.getGenre(), id).size();
@@ -163,6 +168,15 @@ public class FilmDaoImpl implements FilmDao {
     }
 
     @Override
+    public String deleteFilm(int id) {
+        filmService.checkFilm(id);
+        String sql = "delete from films where film_id = ?;";
+        jdbcTemplate.update(sql, id);
+        feedDao.addToFeed(3, id);
+        return STR."Фильм с id=\{id} удалён.";
+    }
+
+    @Override
     public String like(int filmId, int userId) {
         filmService.checkFilmAndUser(filmId, userId);
         String likeCounterSql = "select count(*) from likes where film_id = ? and user_id = ?;";
@@ -171,6 +185,7 @@ public class FilmDaoImpl implements FilmDao {
         if (likeCounter == 0) {
             String likeSql = "INSERT INTO likes (film_id, user_id) VALUES (?, ?);";
             jdbcTemplate.update(likeSql, filmId, userId);
+            feedDao.addToFeed(10, userId, filmId);
             return "Лайк поставлен.";
         } else {
             return "Вы уже ставили лайк этому фильму ранее.";
@@ -182,6 +197,7 @@ public class FilmDaoImpl implements FilmDao {
         filmService.checkFilmAndUser(filmId, userId);
         String likeSql = "delete from likes where film_id = ? and user_id = ?;";
         jdbcTemplate.update(likeSql, filmId, userId);
+        feedDao.addToFeed(21, userId, filmId);
         return "Лайк отменен.";
     }
 

@@ -1,5 +1,6 @@
 package com.example.filmorate.service;
 
+import com.example.filmorate.dao.FeedDao;
 import com.example.filmorate.model.Feedback;
 import com.example.filmorate.storage.CommentStorage;
 import com.example.filmorate.storage.FilmDBStorage;
@@ -23,12 +24,15 @@ import java.util.*;
 public class FeedbackService {
     private final JdbcTemplate jdbcTemplate;
     private final CommentStorage commentStorage;
+    private final FeedDao feedDao;
 
     @Autowired
     public FeedbackService(JdbcTemplate jdbcTemplate,
-                           CommentStorage commentStorage) {
+                           CommentStorage commentStorage,
+                           FeedDao feedDao) {
         this.jdbcTemplate = jdbcTemplate;
         this.commentStorage = commentStorage;
+        this.feedDao = feedDao;
     }
 
     public List<Feedback> getAllComments() {
@@ -58,6 +62,7 @@ public class FeedbackService {
         });
 
         if (rowsAffected > 0) {
+            feedDao.addToFeed(9, userId, filmId);
             String sqlQuery = "SELECT max(id) as id from feedbacks;";
             Integer id = jdbcTemplate.queryForObject(sqlQuery, Integer.class);
             if (id != null) {
@@ -114,7 +119,7 @@ public class FeedbackService {
 
         String sqlStart = "UPDATE feedbacks SET ";
 
-        int rowsAffected = FilmDBStorage.getSqlWithParams(id, feedbackParams, sqlStart, jdbcTemplate);
+        int rowsAffected = FilmDBStorage.getSqlWithParams(id, feedbackParams, sqlStart, jdbcTemplate, "feedbacks");
 
         if (rowsAffected > 0) {
             String updTimestampSql = "UPDATE feedbacks SET feedback_date = ? where id = ?";
@@ -155,6 +160,27 @@ public class FeedbackService {
             String getIdSql = "select id from feedbacks where film_id = ? and author_id = ?;";
             id = Objects.requireNonNull(jdbcTemplate.queryForObject(getIdSql, Integer.class, filmId, userId));
         }
+
+        if (rate > 0 && rate < 11) {
+            String sql = "select rate from feedbacks where id = ?";
+            String oldValue = String.valueOf(jdbcTemplate.queryForObject(sql, Integer.class, id));
+
+            if (oldValue == null) {
+                oldValue = "пусто";
+            }
+            feedDao.addToFeed(23, id, oldValue, String.valueOf(rate));
+        }
+
+        if (!content.isEmpty()) {
+            String sql = "select content from feedbacks where id = ?";
+            String oldValue = jdbcTemplate.queryForObject(sql, String.class, id);
+
+            if (oldValue == null) {
+                oldValue = "пусто";
+            }
+            feedDao.addToFeed(22, id, oldValue, String.valueOf(rate));
+        }
+
         String sql = "update feedbacks set content = ?, feedback_date = ?, film_id = ?, author_id = ?, rate = ? where id = ?";
 
         int finalId = id;
@@ -177,15 +203,16 @@ public class FeedbackService {
 
     public String deleteComment(int id) throws ServerException {
         String idSqlCounter = "select count(*) from feedbacks where id = ?;";
-        Integer count = Objects.requireNonNull(jdbcTemplate.queryForObject(idSqlCounter, Integer.class, id));
+        Integer count = jdbcTemplate.queryForObject(idSqlCounter, Integer.class, id);
 
-        if (count != 1) {
+        if (count == null || count != 1) {
             throw new NoProviderFoundException(STR."Не найден отзыв c id=\{id}");
         }
         String sql = "delete from feedbacks where id = ?;";
         int rowsAffected = jdbcTemplate.update(sql, id);
 
         if (rowsAffected > 0) {
+            feedDao.addToFeed(24, id);
             return STR."Отзыв с id=\{id} удалён.";
         } else {
             throw new ServerException("Непредвиденная ошибка сервера.");

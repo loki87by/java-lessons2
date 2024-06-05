@@ -1,5 +1,6 @@
 package com.example.filmorate.dao.impls;
 
+import com.example.filmorate.dao.FeedDao;
 import com.example.filmorate.dao.FriendshipDao;
 import com.example.filmorate.model.User;
 import com.example.filmorate.service.UserService;
@@ -13,6 +14,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
+import java.rmi.ServerException;
 import java.util.List;
 import java.util.Objects;
 
@@ -21,12 +23,17 @@ public class FriendshipDaoImpl implements FriendshipDao {
     private final JdbcTemplate jdbcTemplate;
     private final UserDBStorage userDBStorage;
     private final UserService userService;
+    private final FeedDao feedDao;
 
     @Autowired
-    public FriendshipDaoImpl(JdbcTemplate jdbcTemplate, UserService userService, UserDBStorage userDBStorage) {
+    public FriendshipDaoImpl(JdbcTemplate jdbcTemplate,
+                             UserService userService,
+                             FeedDao feedDao,
+                             UserDBStorage userDBStorage) {
         this.jdbcTemplate = jdbcTemplate;
         this.userService = userService;
         this.userDBStorage = userDBStorage;
+        this.feedDao = feedDao;
     }
 
     private String getSqlBR(int sid, boolean ifu) {
@@ -61,6 +68,7 @@ public class FriendshipDaoImpl implements FriendshipDao {
             int rowsAffected = jdbcTemplate.update(sql, firstId, secondId);
 
             if (rowsAffected > 0) {
+                feedDao.addToFeed(5, firstId, secondId);
                 return STR."Теперь пользователь `id=\{firstId}' подписан на пользователя `id=\{secondId}'.";
             } else {
                 return "Что-то пошло не так.";
@@ -88,6 +96,7 @@ public class FriendshipDaoImpl implements FriendshipDao {
             int rowsAffected = jdbcTemplate.update(sqlQuery, followerId, userId);
 
             if (rowsAffected > 0) {
+                feedDao.addToFeed(6, userId, followerId);
                 return STR."Пользователь `id=\{userId}' принял запрос дружбы от пользователя `id=\{followerId}'.";
             } else {
                 return "Что-то пошло не так.";
@@ -110,6 +119,7 @@ public class FriendshipDaoImpl implements FriendshipDao {
                     Objects.requireNonNull(jdbcTemplate.queryForObject(sql, Integer.class, removedId, userId)) == 1;
 
             if (rowsAffected > 0 && !follower) {
+                feedDao.addToFeed(8, userId, removedId);
                 return STR."Пользователь `id=\{userId}' разорвал дружбу с пользователем `id=\{removedId}'.";
             }
         } else if (fromUser && !toUser) {
@@ -123,6 +133,7 @@ public class FriendshipDaoImpl implements FriendshipDao {
                 int rowsAffected = jdbcTemplate.update(sqlQuery, userId, removedId);
 
                 if (rowsAffected > 0) {
+                    feedDao.addToFeed(8, userId, removedId);
                     return STR."Дружба разорвана. \{follow(removedId, userId)}";
                 }
             }
@@ -139,5 +150,29 @@ public class FriendshipDaoImpl implements FriendshipDao {
                         getSqlBR(1, true)} union \{
                         getSqlBR(1, false)})) AS user2 ) AS all_ids GROUP BY id HAVING COUNT(id) > 1);";
         return jdbcTemplate.query(sql, (rs, _) -> userDBStorage.makeUsers(rs), firstId, firstId, secondId, secondId);
+    }
+
+    @Override
+    public String unfollow(int id, int friendId) throws ServerException {
+        String sql = "select id from friendship where from_user = ? and to_user = ?";
+        Integer recId = jdbcTemplate.queryForObject(sql, Integer.class, id, friendId);
+
+        if (recId != null && recId > 0) {
+            String stateSql = "select stateId from friendship where id = ?";
+            Integer stateId = Objects.requireNonNull(jdbcTemplate.queryForObject(stateSql, Integer.class, recId));
+
+            if (stateId == 1) {
+                removeFriend(id, friendId);
+            } else {
+                String newSql = "delete from friendship where id = ?";
+                int rowsAffected = jdbcTemplate.update(newSql, recId);
+
+                if (rowsAffected > 0) {
+                    feedDao.addToFeed(7, id, friendId);
+                    return STR."Пользователь `id=\{id}' отписался от пользователя `id=\{friendId}'.";
+                }
+            }
+        }
+        throw new ServerException("Что-то пошло не так, повторите запрос позже.");
     }
 }

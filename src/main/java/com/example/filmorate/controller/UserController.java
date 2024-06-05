@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.rmi.ServerException;
 import java.util.*;
 
 @RestController
@@ -57,6 +58,11 @@ public class UserController {
         return current.orElseThrow(() -> new NoProviderFoundException("User not found"));
     }
 
+    @DeleteMapping("/{id}")
+    public String removeUser(@PathVariable Integer id) {
+        return userDao.removeUser(id);
+    }
+
     @PostMapping(value = "/{id}/follow/{friendId}")
     public String follow(@PathVariable int id, @PathVariable int friendId) {
         return friendshipDao.follow(id, friendId);
@@ -85,6 +91,11 @@ public class UserController {
     @DeleteMapping("/{id}/friends/{friendId}")
     public String removeFriend(@PathVariable Integer id, @PathVariable Integer friendId) {
         return friendshipDao.removeFriend(id, friendId);
+    }
+
+    @DeleteMapping("/{id}/follows/{friendId}")
+    public String unfollow(@PathVariable Integer id, @PathVariable Integer friendId) throws ServerException {
+        return friendshipDao.unfollow(id, friendId);
     }
 
     @GetMapping("/{id}/friends/common/{friendId}")

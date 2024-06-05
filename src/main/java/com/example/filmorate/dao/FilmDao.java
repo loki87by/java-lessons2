@@ -17,6 +17,7 @@ public interface FilmDao {
     Film findCurrent(int id);
     Optional<Film> create(Film film);
     Film update(Film film);
+    String deleteFilm(int id);
     String like(int filmId, int userId);
     String dislike(int filmId, int userId);
     List<Film> getMostPopular(int length);

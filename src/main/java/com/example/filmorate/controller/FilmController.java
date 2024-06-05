@@ -29,11 +29,11 @@ public class FilmController {
         return filmDao.findAll();
     }
 
-
     @GetMapping("/{id}")
     public Film findCurrent(@PathVariable Integer id) {
         return filmDao.findCurrent(id);
     }
+
     @PostMapping(value = "")
     public Film create(@RequestBody Film film) {
         Optional<Film> newFilm = filmDao.create(film);
@@ -48,6 +48,11 @@ public class FilmController {
         } else {
             throw new NoProviderFoundException("'id' обязательное поле");
         }
+    }
+
+    @DeleteMapping("/{id}")
+    public String deleteFilm(@PathVariable Integer id) {
+        return filmDao.deleteFilm(id);
     }
 
     @PutMapping("/{id}/like/{userId}")

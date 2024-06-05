@@ -1,7 +1,9 @@
 package com.example.filmorate.dao.impls;
 
+import com.example.filmorate.dao.FeedDao;
 import com.example.filmorate.dao.UserDao;
 import com.example.filmorate.model.User;
+import com.example.filmorate.service.FilmService;
 import com.example.filmorate.storage.FilmDBStorage;
 import com.example.filmorate.storage.UserDBStorage;
 
@@ -21,11 +23,15 @@ import java.util.Optional;
 public class UserDaoImpl implements UserDao {
     private final JdbcTemplate jdbcTemplate;
     private final UserDBStorage userDBStorage;
+    private final FeedDao feedDao;
+    private final FilmService filmService;
 
     @Autowired
-    public UserDaoImpl(JdbcTemplate jdbcTemplate, UserDBStorage userDBStorage) {
+    public UserDaoImpl(JdbcTemplate jdbcTemplate, UserDBStorage userDBStorage, FeedDao feedDao, FilmService filmService) {
         this.jdbcTemplate = jdbcTemplate;
         this.userDBStorage = userDBStorage;
+        this.feedDao = feedDao;
+        this.filmService = filmService;
     }
     @Override
     public List<User> findAll() {
@@ -57,9 +63,7 @@ public class UserDaoImpl implements UserDao {
             errorMessage = "Логин обязателен, не может быть пустым или содержать пробелы.";
             throw new ValidationException(errorMessage);
         }
-
         userDBStorage.checkUserBirthday(user.getBirthday());
-
         String sql = "INSERT INTO users (email, login, birthday";
 
         if (user.getName() != null) {
@@ -86,6 +90,7 @@ public class UserDaoImpl implements UserDao {
 
             if (id != null) {
                 user.setId(id);
+                feedDao.addToFeed(2, id);
                 return Optional.of(user);
             }
         }
@@ -113,12 +118,20 @@ public class UserDaoImpl implements UserDao {
         userParams.put("name", user.getName());
         userParams.put("birthday", user.getBirthday());
         String sqlStart = "UPDATE users SET ";
-        int rowsAffected = FilmDBStorage.getSqlWithParams(id, userParams, sqlStart, jdbcTemplate);
+        int rowsAffected = FilmDBStorage.getSqlWithParams(id, userParams, sqlStart, jdbcTemplate, "users");
 
         if (rowsAffected > 0) {
             String sqlQuery = "SELECT * from users where id = ?;";
             return jdbcTemplate.query(sqlQuery, (rs, _) -> userDBStorage.makeUsers(rs), id).getFirst();
         }
         return null;
+    }
+    @Override
+    public String removeUser(int id) {
+        filmService.checkUser(id);
+        String sql = "delete from users where user_id = ?;";
+        jdbcTemplate.update(sql, id);
+        feedDao.addToFeed(4, id);
+        return STR."Пользователь с id=\{id} удалил свой профиль.";
     }
 }
