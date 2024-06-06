@@ -1,0 +1,4 @@
+2024-06-06 12:37:52.113264+03:00 jdbc[131]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Таблица "FEED_REALTIONS" не найдена
+Table "FEED_REALTIONS" not found; SQL statement:
+select * from feed_realtions [42102-224]

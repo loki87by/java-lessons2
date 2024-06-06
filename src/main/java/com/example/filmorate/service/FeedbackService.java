@@ -153,7 +153,6 @@ public class FeedbackService {
                     STR."У фильма с id=\{filmId} несколько комментов от пользователя с id=\{userId}," +
                             "добавьте в адресную строку id комментария");
         }
-
         if (cur != 0) {
             id = cur;
         } else {
@@ -161,14 +160,17 @@ public class FeedbackService {
             id = Objects.requireNonNull(jdbcTemplate.queryForObject(getIdSql, Integer.class, filmId, userId));
         }
 
-        if (rate > 0 && rate < 11) {
+        if (rate >= 0 && rate < 11) {
             String sql = "select rate from feedbacks where id = ?";
             String oldValue = String.valueOf(jdbcTemplate.queryForObject(sql, Integer.class, id));
 
             if (oldValue == null) {
                 oldValue = "пусто";
             }
-            feedDao.addToFeed(23, id, oldValue, String.valueOf(rate));
+
+            if (!oldValue.equals(String.valueOf(rate))) {
+                feedDao.addToFeed(23, userId, filmId, oldValue, String.valueOf(rate));
+            }
         }
 
         if (!content.isEmpty()) {
@@ -178,7 +180,10 @@ public class FeedbackService {
             if (oldValue == null) {
                 oldValue = "пусто";
             }
-            feedDao.addToFeed(22, id, oldValue, String.valueOf(rate));
+
+            if (!oldValue.equals(content)) {
+                feedDao.addToFeed(22, userId, filmId, oldValue, content);
+            }
         }
 
         String sql = "update feedbacks set content = ?, feedback_date = ?, film_id = ?, author_id = ?, rate = ? where id = ?";

@@ -5,7 +5,11 @@ import com.example.filmorate.dao.FeedDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import org.yaml.snakeyaml.error.MissingEnvironmentVariableException;
 
+import java.rmi.ServerException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
@@ -18,10 +22,11 @@ public class FeedDaoImpl implements FeedDao {
     public FeedDaoImpl(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
+
     private void addFeed(int feedTypeId, int relationId, int entity1, Integer entity2, String param1, String param2) {
         Timestamp feedDate = Timestamp.from(Instant.now());
         String sql =
-                "insert into feed (feed_date, feed_type_id, realtion_id, entity1 ,entity2, param1 ,param2)" +
+                "insert into feed (feed_date, feed_type_id, relation_id, entity1 ,entity2, param1 ,param2)" +
                         "values (?, ?, ?, ?, ?, ?, ?);";
 
         jdbcTemplate.update(sql, feedDate, feedTypeId, relationId, entity1, entity2, param1, param2);
@@ -40,6 +45,11 @@ public class FeedDaoImpl implements FeedDao {
     @Override
     public void addToFeed(int relationId, int entity1, String param1, String param2) {
         addFeed(3, relationId, entity1, null, param1, param2);
+    }
+
+    @Override
+    public void addToFeed(int relationId, int entity1, int entity2, String param1, String param2) {
+        addFeed(5, relationId, entity1, entity2, param1, param2);
     }
 
     @Override
@@ -73,7 +83,7 @@ public class FeedDaoImpl implements FeedDao {
         addToFeed(relationId, entityId, oldValue.toString(), newValue.toString());
     }
 
-    private void feedbackParamsUpdate(String columnName, Object oldValue, Object newValue, int entityId) {
+    private void feedbackParamsUpdate(String columnName, Object oldValue, Object newValue, int entityId, int entity2Id) {
         int relationId = switch (columnName) {
             case "content" -> 22;
             case "rate" -> 23;
@@ -83,11 +93,12 @@ public class FeedDaoImpl implements FeedDao {
         if (relationId == 0) {
             return;
         }
-        addToFeed(relationId, entityId, oldValue.toString(), newValue.toString());
+        addToFeed(relationId, entityId, entity2Id, oldValue.toString(), newValue.toString());
     }
 
     @Override
     public void checkUpdates(String entityName, int entityId, List<String> notNullParamsList, List<Object> paramValues) {
+
         for (int i = 0; i < notNullParamsList.size(); i++) {
             String columnName = notNullParamsList.get(i).split(" ")[0];
             String sql = STR."select \{columnName} from \{entityName} where id = ?";
@@ -98,7 +109,7 @@ public class FeedDaoImpl implements FeedDao {
                 oldValue = "пусто";
             }
 
-            if (!oldValue.toString().equals(newValue.toString())){
+            if (!oldValue.toString().equals(newValue.toString())) {
 
                 if (entityName.equals("films")) {
                     filmParamsUpdate(columnName, oldValue, newValue, entityId);
@@ -109,60 +120,73 @@ public class FeedDaoImpl implements FeedDao {
                 }
 
                 if (entityName.equals("feedbacks")) {
-                    feedbackParamsUpdate(columnName, oldValue, newValue, entityId);
+                    int filmIdIndex = notNullParamsList.indexOf("film_id = ?");
+
+                    if (filmIdIndex == -1) {
+                        throw new MissingEnvironmentVariableException("Необходимо передать id фильма.");
+                    }
+                    int filmId = Integer.parseInt(paramValues.get(filmIdIndex).toString());
+                    feedbackParamsUpdate(columnName, oldValue, newValue, entityId, filmId);
                 }
             }
         }
     }
-    /*
-    feed_date timestamp,
-    feed_type_id int NOT NULL,,
-    realtion_id int NOT NULL
-    entity1 int NOT NULL,
-    entity2 int,
-    param1 varchar(100),
-    param2 varchar(100)
 
-    if t1 => e1+ri
-    if t2 => e1+ri+e2
-    if t3 => e1+ri+p1+p2
-    if t4 => e1+ri+e2+e3
+    private String[] getRelationData (int id) {
+        String sql = "select * from feed_relations where id = ?;";
+        return jdbcTemplate.queryForObject(sql, (rs, _) -> {
+            String content = rs.getString("content");
+            String entityType = rs.getString("entity_type");
+            return new String[]{content, entityType};
+        }, id);
+    }
 
-    *
+    private String getFeed(ResultSet rs) throws SQLException, ServerException {
+        Timestamp time = rs.getTimestamp("FEED_DATE");
+        int relId = rs.getInt("RELATION_ID");
+        String entityType = getRelationData(relId)[1];
+        String description = getRelationData(relId)[0];
+        int type = rs.getInt("FEED_TYPE_ID");
+        int entity1id = rs.getInt("entity1");
 
-    feed type id
-    --entity1 doing something with entity2 and entity3 (4)
-    --entity1 change param1 to param2 (3)
-    --entity1 doing something with entity2 (2)
-    --added/removed entity (1)
+        if (type == 1) {
+            return STR."\{time}: \{description}\{entity1id}";
+        }
+        int entity2id = rs.getInt("entity2");
 
-    *
+        if (type == 2) {
+            return STR."\{time}: \{entityType}\{entity1id}\{description}\{entity2id}";
+        }
+        String param1content = rs.getString("param1");
+        String param2content = rs.getString("param2");
 
-     realtions:
-1 (content, entity_type) = 'На портал добавлен фильм: ', ''
-2 (content, entity_type) = 'К нам присоединился пользователь: ', ''
-3 (content, entity_type) = 'С портала удален фильм: ', ''
-4 (content, entity_type) = 'Нас покинул пользователь: ', ''
-5 (content, entity_type) = ' подписался на пользователя: ', 'Пользователь: '
-6 (content, entity_type) = ' принял в друзья пользователя: ', 'Пользователь: '
-7 (content, entity_type) = ' отписался от пользователя: ', 'Пользователь: '
-8 (content, entity_type) = ' удалил из друзей пользователя: ', 'Пользователь: '
-9 (content, entity_type) = ' прокомментировал фильм: ', 'Пользователь: '
-10 (content, entity_type) = ' поставил лайк фильму: ', 'Пользователь: '
-11 (content, entity_type) = ' обновлен список жанров: ', 'У фильма: '
-12 (content, entity_type) = ' изменилось название с: ', 'У фильма: '
-13 (content, entity_type) = ' изменилось описание с: ', 'У фильма: '
-14 (content, entity_type) = ' изменилась дата выхода с: ', 'У фильма: '
-15 (content, entity_type) = ' изменилась продолжительность с: ', 'У фильма: '
-16 (content, entity_type) = ' изменилось возрастное ограничение с: ', 'У фильма: '
-17 (content, entity_type) = ' изменил имя с: ', 'Пользователь: '
-18 (content, entity_type) = ' изменил почту с: ', 'Пользователь: '
-19 (content, entity_type) = ' поменял дату рождения с: ', 'Пользователь: '
-20 (content, entity_type) = ' порекомендовал фильм: ', 'Пользователь: '
-21 (content, entity_type) = ' отменил лайк у фильма: ', 'Пользователь: '
-22 (content, entity_type) = ' отредактировал комментарий к фильму: ', 'Пользователь: '
-23 (content, entity_type) = ' поставил/изменил оценку к фильму: ', 'Пользователь: '
-24 (content, entity_type) = 'Удалён отзыв о фильме: '
-25 (content, entity_type) = ' отменил рекомендацию фильма: ', 'Пользователь: '
-*/
+        if (type == 3) {
+            return STR."\{time}: \{entityType}\{entity1id}\{description} \{param1content} на: \{param2content}";
+        }
+
+        if (type == 4) {
+            return STR."\{time}: \{entityType}\{entity1id}\{description}\{entity2id} пользователю: \{param1content}";
+        }
+
+        if (type == 5) {
+            return STR."\{time}: \{entityType}\{entity1id}\{description}\{entity2id} c: \{param1content} на: \{param2content}";
+        }
+
+        throw new ServerException("Что-то пошло не так.");
+    }
+@Override
+    public List<String> getHistory(int limit, int page, String direction) {
+
+        if (page < 1) {
+            page = 1;
+        }
+        String sql = STR."select * from feed order by FEED_DATE \{direction} limit \{limit} offset \{limit * (page - 1)}";
+        return jdbcTemplate.query(sql, (rs, _) -> {
+            try {
+                return getFeed(rs);
+            } catch (ServerException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
 }

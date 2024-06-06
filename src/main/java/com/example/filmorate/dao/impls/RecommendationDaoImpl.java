@@ -100,6 +100,7 @@ public class RecommendationDaoImpl implements RecommendationDao {
             return "Вы уже рекомендовали это фильм все своим друзьям";
         }
     }
+
     @Override
     public String deleteRecommendations(int authorId, int recId) throws ServerException {
         feedbackService.idChecker("users", authorId, " пользователь");

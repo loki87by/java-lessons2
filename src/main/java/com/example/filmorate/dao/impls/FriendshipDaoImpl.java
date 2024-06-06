@@ -11,6 +11,7 @@ import jakarta.validation.ValidationException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -155,7 +156,12 @@ public class FriendshipDaoImpl implements FriendshipDao {
     @Override
     public String unfollow(int id, int friendId) throws ServerException {
         String sql = "select id from friendship where from_user = ? and to_user = ?";
-        Integer recId = jdbcTemplate.queryForObject(sql, Integer.class, id, friendId);
+        Integer recId;
+        try {
+            recId = jdbcTemplate.queryForObject(sql, Integer.class, id, friendId);
+        } catch (EmptyResultDataAccessException e) {
+            recId = null;
+        }
 
         if (recId != null && recId > 0) {
             String stateSql = "select stateId from friendship where id = ?";
@@ -173,6 +179,6 @@ public class FriendshipDaoImpl implements FriendshipDao {
                 }
             }
         }
-        throw new ServerException("Что-то пошло не так, повторите запрос позже.");
+        throw new ServerException("Что-то пошло не так, попробуйте изменить запрос или повторить его позже.");
     }
 }
