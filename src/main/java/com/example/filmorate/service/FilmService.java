@@ -10,7 +10,6 @@ import java.util.Objects;
 
 @Service
 public class FilmService {
-
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired

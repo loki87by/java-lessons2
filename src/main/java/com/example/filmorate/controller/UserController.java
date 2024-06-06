@@ -25,7 +25,7 @@ public class UserController {
     private final FriendshipDao friendshipDao;
 
     @Autowired
-    public UserController( UserDao userDao, FriendshipDao friendshipDao) {
+    public UserController(UserDao userDao, FriendshipDao friendshipDao) {
         this.userDao = userDao;
         this.friendshipDao = friendshipDao;
     }
@@ -45,7 +45,7 @@ public class UserController {
     @ResponseStatus(HttpStatus.CREATED)
     public User update(@Valid @RequestBody User user) throws ErrorResponse {
 
-        if(user.getId() > 0) {
+        if (user.getId() > 0) {
             return userDao.update(user);
         } else {
             throw new NoProviderFoundException("'id' обязательное поле");

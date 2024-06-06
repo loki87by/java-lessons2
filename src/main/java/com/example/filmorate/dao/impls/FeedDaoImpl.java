@@ -132,7 +132,7 @@ public class FeedDaoImpl implements FeedDao {
         }
     }
 
-    private String[] getRelationData (int id) {
+    private String[] getRelationData(int id) {
         String sql = "select * from feed_relations where id = ?;";
         return jdbcTemplate.queryForObject(sql, (rs, _) -> {
             String content = rs.getString("content");
@@ -165,16 +165,16 @@ public class FeedDaoImpl implements FeedDao {
         }
 
         if (type == 4) {
-            return STR."\{time}: \{entityType}\{entity1id}\{description}\{entity2id} пользователю: \{param1content}";
+            return STR."\{time}: \{entityType}\{entity1id}\{description}\{entity2id} пользователю c id: \{param1content}";
         }
 
         if (type == 5) {
             return STR."\{time}: \{entityType}\{entity1id}\{description}\{entity2id} c: \{param1content} на: \{param2content}";
         }
-
         throw new ServerException("Что-то пошло не так.");
     }
-@Override
+
+    @Override
     public List<String> getHistory(int limit, int page, String direction) {
 
         if (page < 1) {

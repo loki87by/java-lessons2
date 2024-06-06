@@ -35,9 +35,9 @@ public class ErrorHandler {
         return new ErrorResponse("error: ", e.getMessage()).getMessage();
     }
 
-    @ExceptionHandler(MissingEnvironmentVariableException .class)
+    @ExceptionHandler(MissingEnvironmentVariableException.class)
     @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
-    public static String hasNotDataException(final MissingEnvironmentVariableException  e) {
+    public static String hasNotDataException(final MissingEnvironmentVariableException e) {
         return new ErrorResponse("error: ", e.getMessage()).getMessage();
     }
 

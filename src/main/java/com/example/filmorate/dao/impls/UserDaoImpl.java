@@ -33,6 +33,7 @@ public class UserDaoImpl implements UserDao {
         this.feedDao = feedDao;
         this.filmService = filmService;
     }
+
     @Override
     public List<User> findAll() {
         String sql = "SELECT * FROM users;";
@@ -40,7 +41,7 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    public Optional<User> findById (Integer id) {
+    public Optional<User> findById(Integer id) {
         String sql = "SELECT * FROM users where id = ?;";
         User user = jdbcTemplate.query(sql, (rs, _) -> userDBStorage.makeUsers(rs), id).getFirst();
 
@@ -126,6 +127,7 @@ public class UserDaoImpl implements UserDao {
         }
         return null;
     }
+
     @Override
     public String removeUser(int id) {
         filmService.checkUser(id);

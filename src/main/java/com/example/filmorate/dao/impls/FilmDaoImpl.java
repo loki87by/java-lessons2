@@ -78,7 +78,8 @@ public class FilmDaoImpl implements FilmDao {
 
         if (film.getDescription() != null && film.getDescription().length() > 200) {
             errorMessage =
-                    STR."Длина описания не может превышать 200 символов, а переданный текст содержит \{film.getDescription().length()} символа(ов).";
+                    STR."Длина описания не может превышать 200 символов, а переданный текст содержит \{
+                            film.getDescription().length()} символа(ов).";
             throw new ValidationException(errorMessage);
         }
 
@@ -110,6 +111,7 @@ public class FilmDaoImpl implements FilmDao {
         if (rowsAffected > 0) {
             String sqlQuery = "SELECT max(id) as id from films;";
             Integer id = jdbcTemplate.queryForObject(sqlQuery, Integer.class);
+
             if (id != null) {
                 film.setId(id);
                 feedDao.addToFeed(1, id);
@@ -180,7 +182,8 @@ public class FilmDaoImpl implements FilmDao {
     public String like(int filmId, int userId) {
         filmService.checkFilmAndUser(filmId, userId);
         String likeCounterSql = "select count(*) from likes where film_id = ? and user_id = ?;";
-        Integer likeCounter = Objects.requireNonNull(jdbcTemplate.queryForObject(likeCounterSql, Integer.class, filmId, userId));
+        Integer likeCounter =
+                Objects.requireNonNull(jdbcTemplate.queryForObject(likeCounterSql, Integer.class, filmId, userId));
 
         if (likeCounter == 0) {
             String likeSql = "INSERT INTO likes (film_id, user_id) VALUES (?, ?);";

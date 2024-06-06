@@ -1,6 +1,7 @@
 package com.example.filmorate.model;
 
 import jakarta.validation.constraints.Email;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

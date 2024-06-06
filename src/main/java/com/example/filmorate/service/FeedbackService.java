@@ -83,6 +83,24 @@ public class FeedbackService {
         }
     }
 
+    private static HashMap<String, String> getFeedbackParamsMap(Feedback feedback) {
+        HashMap<String, String> feedbackParams = new HashMap<>();
+
+        if (!feedback.getContent().isEmpty()) {
+            feedbackParams.put("content", feedback.getContent());
+        }
+
+        if (feedback.getFilmId() != 0) {
+            feedbackParams.put("film_id", String.valueOf(feedback.getFilmId()));
+        }
+
+        if (feedback.getAuthor() != 0) {
+            feedbackParams.put("author_id", String.valueOf(feedback.getAuthor()));
+        }
+        feedbackParams.put("rate", String.valueOf(feedback.getRate()));
+        return feedbackParams;
+    }
+
     public Optional<Feedback> changeComment(Feedback feedback) {
         int id = feedback.getId();
         String errorMessage;
@@ -101,25 +119,10 @@ public class FeedbackService {
             errorMessage = "Оценка может быть от 1 до 10 или 0 если без оценки.";
             throw new ValidationException(errorMessage);
         }
-
-        HashMap<String, String> feedbackParams = new HashMap<>();
-
-        if (!feedback.getContent().isEmpty()) {
-            feedbackParams.put("content", feedback.getContent());
-        }
-
-        if(feedback.getFilmId() != 0) {
-            feedbackParams.put("film_id", String.valueOf(feedback.getFilmId()));
-        }
-
-        if(feedback.getAuthor() != 0) {
-            feedbackParams.put("author_id", String.valueOf(feedback.getAuthor()));
-        }
-        feedbackParams.put("rate", String.valueOf(feedback.getRate()));
-
+        HashMap<String, String> feedbackParams = getFeedbackParamsMap(feedback);
         String sqlStart = "UPDATE feedbacks SET ";
-
-        int rowsAffected = FilmDBStorage.getSqlWithParams(id, feedbackParams, sqlStart, jdbcTemplate, "feedbacks");
+        int rowsAffected =
+                FilmDBStorage.getSqlWithParams(id, feedbackParams, sqlStart, jdbcTemplate, "feedbacks");
 
         if (rowsAffected > 0) {
             String updTimestampSql = "UPDATE feedbacks SET feedback_date = ? where id = ?";
@@ -132,7 +135,8 @@ public class FeedbackService {
 
             if (rowsChanged > 0) {
                 String sqlQuery = "SELECT * from feedbacks where id = ?;";
-                return Optional.ofNullable(jdbcTemplate.query(sqlQuery, (rs, _) -> commentStorage.makeFeedbacks(rs), id).getFirst());
+                return Optional.ofNullable(
+                        jdbcTemplate.query(sqlQuery, (rs, _) -> commentStorage.makeFeedbacks(rs), id).getFirst());
             }
         }
         return Optional.empty();
@@ -186,7 +190,8 @@ public class FeedbackService {
             }
         }
 
-        String sql = "update feedbacks set content = ?, feedback_date = ?, film_id = ?, author_id = ?, rate = ? where id = ?";
+        String sql =
+                "update feedbacks set content = ?, feedback_date = ?, film_id = ?, author_id = ?, rate = ? where id = ?";
 
         int finalId = id;
         int rowsAffected = jdbcTemplate.update(connection -> {

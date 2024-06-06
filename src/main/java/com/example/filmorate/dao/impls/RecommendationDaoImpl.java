@@ -19,7 +19,6 @@ import java.util.Objects;
 
 @Component
 public class RecommendationDaoImpl implements RecommendationDao {
-
     private final JdbcTemplate jdbcTemplate;
     private final FeedbackService feedbackService;
     private final FilmDBStorage filmDbStorage;
@@ -51,8 +50,11 @@ public class RecommendationDaoImpl implements RecommendationDao {
         feedbackService.idChecker("users", userId, " пользователь");
         feedbackService.idChecker("users", authorId, " пользователь");
         String checkDuplicateSql = "select count(id) from recommendations where film_id=? and author_id=? and friend_id=?";
-        int duplicateCounter =
-                Objects.requireNonNull(jdbcTemplate.queryForObject(checkDuplicateSql, Integer.class, filmId, authorId, userId));
+        int duplicateCounter = Objects.requireNonNull(jdbcTemplate.queryForObject(checkDuplicateSql,
+                Integer.class,
+                filmId,
+                authorId,
+                userId));
 
         if (duplicateCounter > 0) {
             return -1;
@@ -114,6 +116,7 @@ public class RecommendationDaoImpl implements RecommendationDao {
             feedDao.addToFeed(25, authorId, filmId);
             String sql = "delete from recommendations where author_id = ? and id = ?;";
             int rowsAffected = jdbcTemplate.update(sql, authorId, recId);
+
             if (rowsAffected > 0) {
                 return STR."Рекомендация с id=\{recId} удалена.";
             }

@@ -2,8 +2,11 @@ package com.example.filmorate.controller;
 
 import com.example.filmorate.model.Feedback;
 import com.example.filmorate.service.FeedbackService;
+
 import jakarta.validation.ValidationException;
+
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.yaml.snakeyaml.error.MissingEnvironmentVariableException;
@@ -68,14 +71,12 @@ public class FeedbackController {
     @PutMapping("/comments")
     public Optional<Feedback> changeComment(
             @RequestBody Feedback feedback) {
-
         return feedbackService.changeComment(feedback);
     }
 
     @DeleteMapping("/comments/{id}")
     public String deleteComment(
             @PathVariable Integer id) throws ServerException {
-
         return feedbackService.deleteComment(id);
     }
 }

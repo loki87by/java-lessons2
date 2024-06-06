@@ -82,8 +82,8 @@ public class FilmDBStorage {
                 rs.getInt("mpa_Rating_ID")
         );
         String getLikesSql = "select count(*) from likes where film_id = ?;";
-        Integer count =
-                Objects.requireNonNull(jdbcTemplate.queryForObject(getLikesSql, Integer.class, rs.getInt("id")));
+        Integer count = Objects.requireNonNull(
+                jdbcTemplate.queryForObject(getLikesSql, Integer.class, rs.getInt("id")));
         film.setLikes(count);
         film.setGenre(getGenres(rs.getInt("id")));
         return film;
@@ -99,6 +99,7 @@ public class FilmDBStorage {
         }
         String oldGenreSql = "delete from film_genres where film_id = ?;";
         jdbcTemplate.update(oldGenreSql, id);
+
         for (int genreId : genre) {
 
             if (genreId > 0 && genreId <= 6) {
@@ -106,9 +107,9 @@ public class FilmDBStorage {
                 jdbcTemplate.update(newGenreSql, id, genreId);
             }
         }
-
         return getGenres(id);
     }
+
     public void checkMpaRating(int rating) {
 
         if (rating < 1 || rating > 5) {

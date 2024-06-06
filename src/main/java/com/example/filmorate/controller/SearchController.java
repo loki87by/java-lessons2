@@ -21,6 +21,7 @@ public class SearchController {
     public SearchController(FilmDBStorage filmDBStorage) {
         this.filmDBStorage = filmDBStorage;
     }
+
     @GetMapping("/search/{finded}")
     public List<Film> findAll(@PathVariable String finded) {
         return filmDBStorage.searchFilms(finded);

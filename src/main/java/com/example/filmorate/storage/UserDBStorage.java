@@ -19,7 +19,8 @@ import java.util.regex.Pattern;
 
 @Component
 public class UserDBStorage {
-    public UserDBStorage() {}
+    public UserDBStorage() {
+    }
 
     public User makeUsers(ResultSet rs) throws SQLException {
         return new User(
@@ -48,6 +49,7 @@ public class UserDBStorage {
             }
         }
     }
+
     public boolean isInvalidEmail(String emailValue) {
         String emailRegex = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
         Pattern pattern = Pattern.compile(emailRegex);

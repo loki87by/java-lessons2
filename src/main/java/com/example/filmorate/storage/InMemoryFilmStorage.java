@@ -2,10 +2,8 @@ package com.example.filmorate.storage;
 
 import com.example.filmorate.model.Film;
 
-import com.example.filmorate.model.TypeIdEntity;
 import org.springframework.stereotype.Component;
 
-import java.sql.ResultSet;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -16,25 +14,9 @@ import java.util.Optional;
 
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
-
     private final HashMap<Integer, Film> films = new HashMap<>();
 
     String minDate = "1895-12-28T00:00:00Z";
-
-    @Override
-    public List<TypeIdEntity> getAllMpa() {
-        return null;
-    }
-
-    @Override
-    public TypeIdEntity getMpaById(Integer id) {
-        return null;
-    }
-
-    @Override
-    public Film makeFilms(ResultSet rs) {
-        return null;
-    }
 
     @Override
     public List<Film> findAll() {
@@ -59,8 +41,9 @@ public class InMemoryFilmStorage implements FilmStorage {
         }
 
         if (film.getDescription() != null && film.getDescription().length() > 200) {
-            String errorMessage = "Длина описания не может превышать 200 символов, а переданный текст содержит " +
-                    film.getDescription().length() + " символа(ов).";
+            String errorMessage =
+                    STR."Длина описания не может превышать 200 символов, а переданный текст содержит \{
+                            film.getDescription().length()} символа(ов).";
             result.add(errorMessage);
         }
 
@@ -83,14 +66,14 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film update(Film film) {
+    public Optional<Film> update(Film film) {
         try {
             int id = film.getId();
 
             Film currentFilm = films.get(id);
 
             if (currentFilm == null) {
-                return /*create(film)*/null;
+                return create(film);
             } else {
 
                 if (LocalDate.parse(film.getReleaseDate())
@@ -109,10 +92,7 @@ public class InMemoryFilmStorage implements FilmStorage {
                 if (film.getDuration() > 0) {
                     currentFilm.setDuration(film.getDuration());
                 }
-
-                /*List<Object> result = new ArrayList<>();
-                result.add(currentFilm);*/
-                return null;
+                return Optional.of(currentFilm);
             }
         } catch (NullPointerException e) {
             int id;
@@ -123,17 +103,7 @@ public class InMemoryFilmStorage implements FilmStorage {
                 id = 1;
             }
             film.setId(id);
-            return /*create(film)*/null;
+            return create(film);
         }
-    }
-
-    @Override
-    public List<TypeIdEntity> getAllGenres() {
-        return null;
-    }
-
-    @Override
-    public TypeIdEntity getGenreById(Integer id) {
-        return null;
     }
 }

@@ -2,7 +2,6 @@ package com.example.filmorate.storage;
 
 import com.example.filmorate.model.Feedback;
 
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import java.sql.ResultSet;
@@ -10,13 +9,10 @@ import java.sql.SQLException;
 
 @Component
 public class CommentStorage {
-    private final JdbcTemplate jdbcTemplate;
-    public CommentStorage(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
+    public CommentStorage() {
     }
 
-    public Feedback makeFeedbacks (ResultSet rs) throws SQLException {
-
+    public Feedback makeFeedbacks(ResultSet rs) throws SQLException {
         return new Feedback(
                 rs.getInt("id"),
                 rs.getString("content"),
