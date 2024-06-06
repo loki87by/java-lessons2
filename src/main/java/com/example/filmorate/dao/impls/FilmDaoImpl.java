@@ -93,18 +93,17 @@ public class FilmDaoImpl implements FilmDao {
             errorMessage = "Продолжительность должна быть положительной.";
             throw new ValidationException(errorMessage);
         }
-
         filmDBStorage.checkMpaRating(film.getMpaRating());
-
-        String sql = "INSERT INTO films (name, description, releaseDate, duration, mpa_rating_id) VALUES (?, ?, ?, ?, ?)";
-
+        String sql = "INSERT INTO films (name, description, director, releaseDate, duration, mpa_rating_id)" +
+                " VALUES (?, ?, ?, ?, ?, ?)";
         int rowsAffected = jdbcTemplate.update(connection -> {
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, film.getName());
             preparedStatement.setString(2, film.getDescription());
-            preparedStatement.setString(3, film.getReleaseDate());
-            preparedStatement.setInt(4, film.getDuration());
-            preparedStatement.setInt(5, film.getMpaRating());
+            preparedStatement.setString(3, film.getDirector());
+            preparedStatement.setString(4, film.getReleaseDate());
+            preparedStatement.setInt(5, film.getDuration());
+            preparedStatement.setInt(6, film.getMpaRating());
             return preparedStatement;
         });
 
@@ -152,6 +151,7 @@ public class FilmDaoImpl implements FilmDao {
         HashMap<String, String> filmParams = new HashMap<>();
         filmParams.put("name", film.getName());
         filmParams.put("description", film.getDescription());
+        filmParams.put("director", film.getDirector());
         filmParams.put("releaseDate", film.getReleaseDate());
         filmParams.put("duration", String.valueOf(film.getDuration()));
         filmParams.put("mpa_rating_id", String.valueOf(film.getMpaRating()));
@@ -204,13 +204,40 @@ public class FilmDaoImpl implements FilmDao {
         return "Лайк отменен.";
     }
 
+    private Object[] addToArray(Object[] arr, Object addedElement) {
+        arr = Arrays.copyOf(arr, arr.length + 1);
+        arr[arr.length - 1] = addedElement;
+        return arr;
+    }
+
     @Override
-    public List<Film> getMostPopular(int length) {
-        String sqlQuery =
-                "SELECT * FROM films WHERE id IN (" +
-                        "SELECT film_id FROM likes GROUP BY film_id HAVING COUNT(DISTINCT user_id) > 0)" +
-                        "ORDER BY (SELECT COUNT(DISTINCT user_id) FROM likes WHERE film_id = films.id) DESC LIMIT ?;";
-        return jdbcTemplate.query(sqlQuery, (rs, _) -> filmDBStorage.makeFilms(rs), length);
+    public List<Film> getMostPopular(int length, int genre, int year, String director) {
+        String sqlStart =
+                "SELECT f.*, COUNT(DISTINCT l.id) AS like_count " +
+                        "FROM films f LEFT JOIN likes l ON f.id = l.film_id ";
+        String sqlGenreFilter = "";
+        Object[] arguments = new Object[]{};
+
+        if (genre > 0 && genre < 7) {
+            sqlGenreFilter = "LEFT JOIN film_genres g ON f.id = g.film_id WHERE g.genre_id = ?";
+            arguments = addToArray(arguments, genre);
+        }
+
+        if (year != 0) {
+            sqlGenreFilter += (genre > 0 && genre < 7) ? " AND " : " WHERE ";
+            sqlGenreFilter += "YEAR(RELEASEDATE) = ?";
+            arguments = addToArray(arguments, year);
+        }
+
+        if (!director.isEmpty()) {
+            sqlGenreFilter += ((genre > 0 && genre < 7) || (year != 0)) ? " AND " : " WHERE ";
+            sqlGenreFilter += "f.director = ?";
+            arguments = addToArray(arguments, genre);
+        }
+        arguments = addToArray(arguments, length);
+        String sqlEnd = "GROUP BY f.id ORDER BY like_count DESC LIMIT ?;";
+        String sqlQuery = sqlStart + sqlGenreFilter + sqlEnd;
+        return jdbcTemplate.query(sqlQuery, (rs, _) -> filmDBStorage.makeFilms(rs), arguments);
     }
 
     @Override

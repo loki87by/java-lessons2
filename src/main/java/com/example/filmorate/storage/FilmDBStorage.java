@@ -77,6 +77,7 @@ public class FilmDBStorage {
                 rs.getInt("id"),
                 rs.getString("name"),
                 rs.getString("description"),
+                rs.getString("director"),
                 rs.getString("releaseDate"),
                 rs.getInt("duration"),
                 rs.getInt("mpa_Rating_ID")
@@ -127,7 +128,8 @@ public class FilmDBStorage {
     public List<Film> searchFilms(String finded) {
         String resSql =
                 "select * from films where lower(name) like lower(concat('%', ?, '%')) " +
-                        "or lower(description) like lower(concat('%', ?, '%'));";
+                        "or lower(description) like lower(concat('%', ?, '%')) " +
+                        "or lower(director) like lower(concat('%', ?, '%'));";
         return jdbcTemplate.query(resSql, (rs, _) -> makeFilms(rs), finded, finded);
     }
 }

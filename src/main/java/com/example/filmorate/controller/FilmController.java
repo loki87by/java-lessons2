@@ -67,8 +67,12 @@ public class FilmController {
 
     @GetMapping("/popular")
     public List<Film> getMostPopular(
-            @RequestParam(required = false, defaultValue = "10") Integer count) {
-        return filmDao.getMostPopular(count);
+            @RequestParam(required = false, defaultValue = "10") Integer count,
+            @RequestParam(required = false, defaultValue = "0") Integer genre,
+            @RequestParam(required = false, defaultValue = "0") Integer year,
+            @RequestParam(required = false, defaultValue = "") String director) {
+
+        return filmDao.getMostPopular(count, genre, year, director);
     }
 
     @GetMapping("/{userId}/common_films/{friendId}")

@@ -61,6 +61,7 @@ public class FeedDaoImpl implements FeedDao {
         int relationId = switch (columnName) {
             case "name" -> 12;
             case "description" -> 13;
+            case "director" -> 26;
             case "releaseDate" -> 14;
             case "duration" -> 15;
             case "mpa_rating_id" -> 16;

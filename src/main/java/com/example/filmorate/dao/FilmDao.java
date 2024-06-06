@@ -32,7 +32,7 @@ public interface FilmDao {
 
     String dislike(int filmId, int userId);
 
-    List<Film> getMostPopular(int length);
+    List<Film> getMostPopular(int length, int genre, int year, String director);
 
     List<Film> getCrossFilms(int userId, int friendId);
 }

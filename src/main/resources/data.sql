@@ -106,6 +106,9 @@ where not exists (select 1 from PUBLIC.feed_relations where content = 'Удал�
 insert into PUBLIC.feed_relations (content, entity_type)
 select ' отменил рекомендацию фильма с id=', 'Пользователь с id='
 where not exists (select 1 from PUBLIC.feed_relations where content = ' отменил рекомендацию фильма с id=');
+insert into PUBLIC.feed_relations (content, entity_type)
+select ' изменился режиссёр с: ', 'У фильма с id='
+where not exists (select 1 from PUBLIC.feed_relations where content = ' изменился режиссёр с: ');
 insert into PUBLIC.feed_types (type)
 select 1
 where not exists (select 1 from PUBLIC.feed_types where type = 1);
