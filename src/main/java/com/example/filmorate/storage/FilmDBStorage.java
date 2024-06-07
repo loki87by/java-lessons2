@@ -130,6 +130,6 @@ public class FilmDBStorage {
                 "select * from films where lower(name) like lower(concat('%', ?, '%')) " +
                         "or lower(description) like lower(concat('%', ?, '%')) " +
                         "or lower(director) like lower(concat('%', ?, '%'));";
-        return jdbcTemplate.query(resSql, (rs, _) -> makeFilms(rs), finded, finded);
+        return jdbcTemplate.query(resSql, (rs, _) -> makeFilms(rs), finded, finded, finded);
     }
 }

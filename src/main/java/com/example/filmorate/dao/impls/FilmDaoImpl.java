@@ -231,8 +231,8 @@ public class FilmDaoImpl implements FilmDao {
 
         if (!director.isEmpty()) {
             sqlGenreFilter += ((genre > 0 && genre < 7) || (year != 0)) ? " AND " : " WHERE ";
-            sqlGenreFilter += "f.director = ?";
-            arguments = addToArray(arguments, genre);
+            sqlGenreFilter += "lower(f.director) like lower(concat('%', ?, '%')) ";
+            arguments = addToArray(arguments, director);
         }
         arguments = addToArray(arguments, length);
         String sqlEnd = "GROUP BY f.id ORDER BY like_count DESC LIMIT ?;";

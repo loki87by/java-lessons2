@@ -1,117 +1,42 @@
-2024-06-06 12:37:52.113264+03:00 jdbc[131]: exception
-org.h2.jdbc.JdbcSQLSyntaxErrorException: Таблица "FEED_REALTIONS" не найдена
-Table "FEED_REALTIONS" not found; SQL statement:
-select * from feed_realtions [42102-224]
-2024-06-06 22:45:54.022093+03:00 jdbc[138]: exception
-org.h2.jdbc.JdbcSQLSyntaxErrorException: Функция "COUNT" не найдена
-Function "COUNT" not found; SQL statement:
-select * from films 
-left join count(film_id) as likes from likes
-on likes.film_id = films.id [90022-224]
-	at org.h2.message.DbException.getJdbcSQLException(DbException.java:644)
+2024-06-07 09:08:34.053743+03:00 jdbc[223]: exception
+org.h2.jdbc.JdbcSQLDataException: Ошибка преобразования данных при конвертации "CHARACTER VARYING to DECFLOAT"
+Data conversion error converting "CHARACTER VARYING to DECFLOAT"; SQL statement:
+SELECT f.*, COUNT(DISTINCT l.id) AS like_count FROM films f LEFT JOIN likes l ON f.id = l.film_id LEFT JOIN film_genres g ON f.id = g.film_id WHERE g.genre_id = ? AND f.director = ?GROUP BY f.id ORDER BY like_count DESC LIMIT ? [22018-224]
+2024-06-07 09:13:32.211037+03:00 jdbc[27]: exception
+org.h2.jdbc.JdbcSQLDataException: Параметр "#3" не установлен
+Parameter "#3" is not set; SQL statement:
+select * from films where lower(name) like lower(concat('%', ?, '%')) or lower(description) like lower(concat('%', ?, '%')) or lower(director) like lower(concat('%', ?, '%')) [90012-224]
+	at org.h2.message.DbException.getJdbcSQLException(DbException.java:658)
 	at org.h2.message.DbException.getJdbcSQLException(DbException.java:489)
 	at org.h2.message.DbException.get(DbException.java:223)
 	at org.h2.message.DbException.get(DbException.java:199)
-	at org.h2.command.Parser.getFunctionAliasWithinPath(Parser.java:2450)
-	at org.h2.command.Parser.readTableFunction(Parser.java:1937)
-	at org.h2.command.Parser.readTablePrimary(Parser.java:1785)
-	at org.h2.command.Parser.readTableReference(Parser.java:2268)
-	at org.h2.command.Parser.readTableReference(Parser.java:2285)
-	at org.h2.command.Parser.parseSelectFromPart(Parser.java:2718)
-	at org.h2.command.Parser.parseSelect(Parser.java:2824)
-	at org.h2.command.Parser.parseQueryPrimary(Parser.java:2708)
-	at org.h2.command.Parser.parseQueryTerm(Parser.java:2564)
-	at org.h2.command.Parser.parseQueryExpressionBody(Parser.java:2543)
-	at org.h2.command.Parser.parseQueryExpressionBodyAndEndOfQuery(Parser.java:2536)
-	at org.h2.command.Parser.parseQueryExpression(Parser.java:2529)
-	at org.h2.command.Parser.parseQuery(Parser.java:2498)
-	at org.h2.command.Parser.parsePrepared(Parser.java:627)
-	at org.h2.command.Parser.parse(Parser.java:592)
-	at org.h2.command.Parser.parse(Parser.java:564)
-	at org.h2.command.Parser.prepareCommand(Parser.java:483)
-	at org.h2.engine.SessionLocal.prepareLocal(SessionLocal.java:639)
-	at org.h2.engine.SessionLocal.prepareCommand(SessionLocal.java:559)
-	at org.h2.jdbc.JdbcConnection.prepareCommand(JdbcConnection.java:1166)
-	at org.h2.jdbc.JdbcStatement.executeInternal(JdbcStatement.java:245)
-	at org.h2.jdbc.JdbcStatement.execute(JdbcStatement.java:231)
-	at org.h2.server.web.WebApp.getResult(WebApp.java:1345)
-	at org.h2.server.web.WebApp.query(WebApp.java:1143)
-	at org.h2.server.web.WebApp.query(WebApp.java:1119)
-	at org.h2.server.web.WebApp.process(WebApp.java:245)
-	at org.h2.server.web.WebApp.processRequest(WebApp.java:177)
-	at org.h2.server.web.JakartaWebServlet.doGet(JakartaWebServlet.java:129)
-	at org.h2.server.web.JakartaWebServlet.doPost(JakartaWebServlet.java:166)
-	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:590)
-	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
-	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:206)
-	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
-	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
-	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
-	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
-	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
-	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
-	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
-	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
-	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
-	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
-	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
-	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
-	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
-	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
-	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
-	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
-	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
-	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
-	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:482)
-	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
-	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
-	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
-	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
-	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:391)
-	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
-	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:896)
-	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1736)
-	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
-	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1191)
-	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
-	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
-	at java.base/java.lang.Thread.run(Thread.java:1583)
-2024-06-06 23:11:36.997003+03:00 jdbc[138]: exception
-org.h2.jdbc.JdbcSQLSyntaxErrorException: Столбец "G.GENRE_ID" должен быть в предложении GROUP BY
-Column "G.GENRE_ID" must be in the GROUP BY list; SQL statement:
-SELECT f.*, 
-       COUNT(DISTINCT l.id) AS like_count,
-g.GENRE_ID
-  FROM films f
-       LEFT JOIN likes l ON f.id = l.film_id
-       LEFT JOIN film_genres g ON f.id = g.film_id
- GROUP BY f.id [90016-224]
-	at org.h2.message.DbException.getJdbcSQLException(DbException.java:644)
-	at org.h2.message.DbException.getJdbcSQLException(DbException.java:489)
-	at org.h2.message.DbException.get(DbException.java:223)
-	at org.h2.message.DbException.get(DbException.java:199)
-	at org.h2.expression.ExpressionColumn.updateAggregate(ExpressionColumn.java:266)
-	at org.h2.command.query.Select.updateAgg(Select.java:539)
-	at org.h2.command.query.Select$LazyResultGroupSorted.fetchNextRow(Select.java:1930)
-	at org.h2.result.LazyResult.hasNext(LazyResult.java:78)
-	at org.h2.result.FetchedResult.next(FetchedResult.java:34)
-	at org.h2.command.query.Select.queryGroupSorted(Select.java:320)
-	at org.h2.command.query.Select.queryWithoutCache(Select.java:826)
-	at org.h2.command.query.Query.queryWithoutCacheLazyCheck(Query.java:197)
-	at org.h2.command.query.Query.query(Query.java:520)
-	at org.h2.command.query.Query.query(Query.java:483)
-	at org.h2.command.CommandContainer.query(CommandContainer.java:252)
+	at org.h2.expression.Parameter.checkSet(Parameter.java:75)
+	at org.h2.command.Prepared.checkParameters(Prepared.java:207)
+	at org.h2.command.CommandContainer.query(CommandContainer.java:251)
 	at org.h2.command.Command.executeQuery(Command.java:192)
-	at org.h2.jdbc.JdbcStatement.executeInternal(JdbcStatement.java:257)
-	at org.h2.jdbc.JdbcStatement.execute(JdbcStatement.java:231)
-	at org.h2.server.web.WebApp.getResult(WebApp.java:1345)
-	at org.h2.server.web.WebApp.query(WebApp.java:1143)
-	at org.h2.server.web.WebApp.query(WebApp.java:1119)
-	at org.h2.server.web.WebApp.process(WebApp.java:245)
-	at org.h2.server.web.WebApp.processRequest(WebApp.java:177)
-	at org.h2.server.web.JakartaWebServlet.doGet(JakartaWebServlet.java:129)
-	at org.h2.server.web.JakartaWebServlet.doPost(JakartaWebServlet.java:166)
-	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:590)
+	at org.h2.jdbc.JdbcPreparedStatement.executeQuery(JdbcPreparedStatement.java:131)
+	at org.springframework.jdbc.core.JdbcTemplate$1.doInPreparedStatement(JdbcTemplate.java:732)
+	at org.springframework.jdbc.core.JdbcTemplate.execute(JdbcTemplate.java:658)
+	at org.springframework.jdbc.core.JdbcTemplate.query(JdbcTemplate.java:723)
+	at org.springframework.jdbc.core.JdbcTemplate.query(JdbcTemplate.java:754)
+	at org.springframework.jdbc.core.JdbcTemplate.query(JdbcTemplate.java:767)
+	at org.springframework.jdbc.core.JdbcTemplate.query(JdbcTemplate.java:825)
+	at com.example.filmorate.storage.FilmDBStorage.searchFilms(FilmDBStorage.java:133)
+	at com.example.filmorate.controller.SearchController.findAll(SearchController.java:27)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:255)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:188)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:926)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:831)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doGet(FrameworkServlet.java:903)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:564)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
 	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
 	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:206)
 	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
@@ -146,25 +71,3 @@ g.GENRE_ID
 	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
 	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
 	at java.base/java.lang.Thread.run(Thread.java:1583)
-2024-06-06 23:54:26.517309+03:00 jdbc[37]: exception
-org.h2.jdbc.JdbcSQLSyntaxErrorException: Таблица "F" не найдена
-Table "F" not found; SQL statement:
-SELECT f.*, 
-       COUNT(DISTINCT l.id) AS like_count,
-YEAR(RELEASEDATE)
-g.GENRE_ID
-  FROM films f
-       LEFT JOIN likes l ON f.id = l.film_id
-       LEFT JOIN film_genres g ON f.id = g.film_id
- GROUP BY f.id, GENRE_ID [42102-224]
-2024-06-06 23:54:37.253414+03:00 jdbc[37]: exception
-org.h2.jdbc.JdbcSQLSyntaxErrorException: Таблица "F" не найдена
-Table "F" not found; SQL statement:
-SELECT f.*, 
-       COUNT(DISTINCT l.id) AS like_count,
-YEAR(f.RELEASEDATE)
-g.GENRE_ID
-  FROM films f
-       LEFT JOIN likes l ON f.id = l.film_id
-       LEFT JOIN film_genres g ON f.id = g.film_id
- GROUP BY f.id, GENRE_ID [42102-224]
